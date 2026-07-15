@@ -1,0 +1,297 @@
+================================================================================
+NDU COOPERATIVE MANAGEMENT SYSTEM — FRONTEND QA GUIDE
+================================================================================
+
+WHAT THIS IS
+------------
+This is a full, clickable UI prototype of the system described in the
+proposal (NDU_Cooperative_Management_System_Final_Proposal_3M.docx). Every
+screen is real, working React code — but all data is MOCKED in the browser's
+memory. There is no database and no real backend yet (that is Phase 1 onward
+of the build). The purpose of this pass is to let you confirm the UI covers
+every feature in the proposal, and to sign off on look/feel, before backend
+work begins.
+
+Use this document as a checklist: work through each section, tick off what
+you find, and note anything that looks wrong, missing, or confusing.
+
+
+HOW TO RUN IT
+-------------
+From the project root (two terminals):
+
+    Terminal 1:  cd backend  &&  venv/bin/python manage.py runserver
+    Terminal 2:  cd frontend &&  npm run dev
+
+Then open http://localhost:5173/login in your browser.
+
+*** IMPORTANT — READ BEFORE TESTING ***
+Because there is no database yet, every "submission" (a deposit request, an
+approval, onboarding a member, etc.) only lives in your browser's memory for
+the current tab session. This means:
+  - Click around using the sidebar links, not the browser's refresh button.
+  - If you refresh the page or close the tab, all your test actions (and the
+    mock data changes they made) reset back to the seeded starting state.
+  - This is expected — it is NOT a bug. It goes away once the real backend
+    (Phase 1+) is built and the app is talking to a real database.
+
+
+TEST ACCOUNTS
+--------------
+  Full admin (President):      president@ndu-coop.example   / AdminPass123!
+  Member:                      member1@example.com          / MemberPass123!
+  Read-only admin (Gen. Sec.): gensec@ndu-coop.example       / ReadOnly123!
+
+The proposal defines 4 functionally-identical "full admin" roles (President,
+Treasurer, Accountant, Financial Secretary) and 1 read-only role (General
+Secretary). The President account exercises full-admin behaviour; the
+General Secretary account exercises read-only behaviour (you should see
+"Read-only" badges everywhere and Approve/Reject buttons replaced with a
+"View" button).
+
+
+================================================================================
+PART 1 — MEMBER WALKTHROUGH
+Log in as: member1@example.com / MemberPass123!
+================================================================================
+
+1.1  DASHBOARD  (/)
+  - Greeting header shows your name and membership ID, with a copy icon next
+    to the ID (click it — icon should flip to a checkmark briefly).
+  - 5 balance cards: Total assets, Shares, Compulsory savings, Deposits,
+    Welfare. Total assets = Shares + Compulsory savings + Deposits (Welfare
+    is deliberately excluded, per proposal §5).
+  - "Quick actions" buttons should each take you to the matching page
+    (Request a deposit / withdrawal, Apply for a loan, Apply for a
+    commodity).
+  [Proposal §16 — member dashboard balance visibility]
+
+1.2  MY PROFILE  (click your name/avatar at the bottom of the sidebar)
+  - Shows membership ID (with copy button), status, contact details.
+  - "Bank account details" form is pre-filled — change the bank name or
+    account number and click Save changes. You should get a success toast.
+  - Go back to the Dashboard, then Withdrawals → New withdrawal request —
+    the payout account field should default to whatever you just saved here.
+  [Proposal §25 — "Members can edit their bank account details"]
+
+1.3  CONTRIBUTIONS  (/contributions)
+  - 4 stat cards showing the fixed monthly split (Shares ₦7,000 / Welfare
+    ₦200 / Compulsory Savings ₦3,000 / minimum total ₦10,200).
+  - A history table of your past months, each row has a Receipt download
+    button (mocked — shows a toast, no real file).
+  - Numbers here should match your Dashboard balances (they're driven by the
+    same underlying data — this was a real bug we found and fixed; worth
+    double-checking).
+  [Proposal §6 — monthly contribution split; §18 — monthly payment receipts]
+
+1.4  DEPOSITS  (/deposits)
+  - "New deposit request": form shows the cooperative's bank account details
+    (bank/account name/number, with a copy button on the number), an amount
+    field, a required receipt upload, and an optional note.
+  - Try submitting without a receipt — you should get an error toast telling
+    you a receipt is required.
+  - After submitting, your request appears at the top of the table as
+    "Pending", with a Receipt column showing the file you attached.
+  [Proposal §7 — full deposit process]
+
+1.5  WITHDRAWALS  (/withdrawals)
+  - "New withdrawal request": shows a banner telling you your withdrawal cap.
+    Since this test member has an active loan, the cap should be reduced
+    (not just your full deposit balance) — the banner explains why.
+  - Payout account number field is pre-filled from your Profile, editable
+    for this request only ("confirm or edit account number").
+  - History table shows past requests with their payout account number and
+    status.
+  [Proposal §8 — full withdrawal process, including the active-loan cap rule]
+
+1.6  LOANS  (/loans)
+  - Because this test member already has an active loan, you should see a
+    banner saying so, with the 3 product "Apply" buttons disabled and a link
+    to top up the existing loan instead.
+  - Click into "My loans" → the active loan row → loan detail page:
+      - Stat cards: Principal, Outstanding balance, Monthly repayment,
+        Interest rate (with a note if the 9% high-risk override applied).
+      - Guarantors list with accept/pending status.
+      - "Make a repayment" button → opens a modal with the cooperative's
+        loan-repayments bank account, an amount field, and a required
+        receipt upload — this is the "repay any time by bank transfer"
+        workflow (separate from the automatic monthly salary deduction
+        shown in the "Repayment history" table below).
+      - "Top up this loan" button → shows a live calculation preview
+        (interest, fee, old balance cleared, final amount disbursed) as you
+        type an amount.
+      - "Your repayment requests" table shows anything you've submitted via
+        "Make a repayment", with its approval status.
+  - "Guarantor requests" tab (next to "My loans"): shows loan requests where
+    someone has asked you to be a guarantor (empty for this test member —
+    try it from a different login if you want to see it populated, or check
+    the admin side).
+  [Proposal §9-14 — full loan system incl. interest, 9% rule, application
+   fee, guarantors, top-up, and anytime manual repayment]
+
+1.7  APPLY FOR A LOAN  (only reachable if you don't already have one active —
+     test this by first finishing/repaying the seeded loan, or check the code
+     review notes)
+  - 3-step wizard: Product & amount (live interest/fee/disbursement preview,
+    with a warning banner if the amount triggers the 9% high-risk override)
+    → Guarantors (enter a membership ID per guarantor — the system looks up
+    and shows their name for you to confirm, not a pick-a-member list) →
+    Review & submit.
+  [Proposal §11 — 9% rule; §13 — "member enters two guarantor membership
+   IDs... system... brings out their name for confirmation"]
+
+1.8  COMMODITIES  (/commodities)
+  - Catalog cards for each item (Rice, Vegetable Oil, Beans, Sugar), showing
+    price, stock level, and an Apply button (disabled when out of stock).
+  - "My applications" table: status, a repayment-progress bar once approved,
+    a Receipt button, and a "Repay" button (only when there's an approved
+    plan with money still owing) that opens the same
+    bank-details-plus-receipt-upload flow as loan repayment.
+  [Proposal §15 — commodities, including "loan repayment and commodity
+   repayment running at the same time"]
+
+1.9  REPORTS  (/reports)
+  - Pick a period, click "Download my statement" — watch the progress bar
+    animate, then check the "Previous downloads" table updates.
+  [Proposal §16 — "Download statements"]
+
+
+================================================================================
+PART 2 — FULL ADMIN WALKTHROUGH
+Log in as: president@ndu-coop.example / AdminPass123!
+================================================================================
+
+2.1  DASHBOARD  (/)
+  - "This month's contributions..." banner — should say NOT posted yet
+    (click it, it takes you to Contributions). Post this month's
+    contributions there, then come back to the Dashboard — the banner
+    should flip to "posted".
+  - Stat cards: Total members, Total assets, Active loans, Active commodity
+    plans.
+  - "Balances breakdown" row: Total shares / welfare / compulsory savings /
+    deposits / completed loans.
+  - "Pending approvals" row: 4 clickable cards linking to each queue.
+  - "Recent approvals" feed: a live list of the most recent decided items
+    (deposits, withdrawals, loans, commodities) across the whole
+    cooperative — approve or reject something in any queue, then come back
+    here and confirm it appears at the top.
+  [Proposal §17 — full admin dashboard checklist]
+
+2.2  MEMBERS  (/members)
+  - Search box + status filter, paginated table.
+  - "Onboard member" button → modal form → new member appears at the top of
+    the list immediately.
+  - Click into a member → detail page:
+      - "Edit details" button → modal to change phone/department/staff
+        number.
+      - "Suspend" button (only shown for ACTIVE members) → requires a
+        reason, then the member's status badge updates to Suspended.
+      - Ledger history table (their contribution/transaction history).
+  [Proposal §3 — admin-led onboarding; §25 — status tagging; §17 — "manage
+   member records"]
+
+2.3  CONTRIBUTIONS  (/contributions, admin view)
+  - "Post this month's contributions" → confirm modal → animated progress →
+    a new row appears in Posting history.
+  - Each history row has a "Correct" button → modal where you enter a
+    member's membership ID (name resolves for confirmation), an adjustment
+    amount, and a required reason.
+  [Proposal §6 — admin-triggered posting with confirm step; §17 — "correct
+   failed or wrong contribution entries"]
+
+2.4  DEPOSITS / WITHDRAWALS  (/deposits, /withdrawals)
+  - Search + status filter.
+  - Approve/Reject buttons per pending row → confirm modal (rejection
+    requires a reason) → row moves out of the Pending filter.
+  - Row detail ("View") shows the member's note and their uploaded receipt.
+  [Proposal §7-8 — admin approval step]
+
+2.5  LOANS  (/loans, admin view)
+  - "Pending approval" queue: approve/reject, with a Guarantors column
+    showing "2/2 accepted" style status.
+  - "Repayment requests" queue: separate from loan applications — this is
+    where manual/anytime repayments (submitted from the member side) get
+    approved. Approving one should reduce that loan's outstanding balance
+    (spot-check by opening the loan detail page before/after).
+  - "Active loans" cards with a repayment progress bar each.
+  [Proposal §12-13 — approval + manage repayments]
+
+2.6  COMMODITIES  (/commodities, admin view)
+  - Catalog table with inline Edit (price/stock/duration).
+  - Applications queue (approve/reject) — approving should reduce the
+    item's stock count (check the Catalog table above).
+  - Repayment requests queue, same pattern as Loans.
+  [Proposal §15 + §17 — catalog + stock management, manage repayments]
+
+2.7  REPORTS  (/reports, admin view)
+  - Pick "Member Statement" as the report type — a membership-ID field
+    should appear; enter one and confirm the name resolves, then generate.
+  - Other report types (Income & Expenditure, Statement of Financial
+    Position, Receipts & Payments) generate without needing a member.
+  [Proposal §18 — "admins should be able to generate receipts and
+   statements for any member"; §19 — the 3 financial statement types]
+
+2.8  AUDIT LOG  (/audit)
+  - Search box + action-type filter.
+  - Every approve/reject/onboard/correct/edit/suspend action you took above
+    in this walkthrough should show up here, newest first, with actor,
+    target member, before/after values, and reason. Click a row to see the
+    full before/after JSON.
+  - This is a good final check: do a handful of admin actions, then come to
+    this page and confirm each one logged correctly.
+  [Proposal §21 — full audit trail requirements]
+
+2.9  SETTINGS  (/settings, full admin only)
+  - 3 cooperative bank accounts (Deposits / Loan repayments / Commodity
+    repayments) — each has its own Edit button. Change one, then go start a
+    deposit request as a member and confirm the new details show up there.
+  [Implied by proposal §7/§12 bank-details display; this was added based on
+   your feedback that different workflows might use different accounts]
+
+
+================================================================================
+PART 3 — READ-ONLY ADMIN WALKTHROUGH
+Log in as: gensec@ndu-coop.example / ReadOnly123!
+================================================================================
+
+  - Every page should show a "Read-only" badge in the header.
+  - Approval queues (Deposits, Withdrawals, Loans, Commodities, and their
+    Repayment requests) should show a "View" button instead of
+    Approve/Reject.
+  - Members page: no Edit/Suspend buttons on a member's detail page.
+  - Settings is not visible in the sidebar at all.
+  - You should still be able to view everything (members, balances,
+    contributions, deposits, withdrawals, loans, commodities, receipts,
+    reports, audit log) — just not change anything.
+  [Proposal §3.3 — "The General Secretary cannot approve, reject, edit,
+   correct, delete, or update financial records"]
+
+  NOTE: this role-gating is enforced only in the UI for this prototype pass
+  (buttons/actions are hidden). Real server-side permission enforcement is a
+  backend concern (Phase 9 of the build plan).
+
+
+================================================================================
+KNOWN, DELIBERATE SIMPLIFICATIONS (not bugs)
+================================================================================
+
+  - No real file storage: every "receipt upload" and "download" is mocked —
+    a filename is captured/shown but no file is actually stored or
+    generated. This becomes real once the backend's private file storage
+    (Phase 3+) is built.
+  - Wide tables on mobile scroll horizontally rather than reflowing into
+    stacked cards — a deliberate, standard mobile pattern, not a layout bug.
+  - The loan top-up flow is a single form + calculation preview, not a full
+    second wizard.
+  - "Recent transactions" and "Recent approvals" (two separate items in the
+    proposal's admin dashboard list) are combined into one feed, since there
+    is no separate raw "transaction" concept in the mock data yet.
+  - Mock data resets on page refresh — see the note at the top of this
+    document.
+
+
+================================================================================
+IF YOU FIND SOMETHING MISSING
+================================================================================
+Note the page, what you expected, and what you saw — that's all we need to
+track it down and fix it before backend work (Phase 1) begins.
