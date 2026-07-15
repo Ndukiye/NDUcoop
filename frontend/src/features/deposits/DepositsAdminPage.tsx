@@ -1,0 +1,144 @@
+import { useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Select } from "../../components/Select";
+import { TextField } from "../../components/TextField";
+import type { Column } from "../../components/Table";
+import { formatNaira, formatDate } from "../../lib/format";
+import type { ApprovalStatus } from "../../lib/types";
+import { useToast } from "../../components/Toast";
+import { useAuthStore } from "../../store/auth";
+import { isFullAdmin } from "../../lib/roles";
+import { ApprovalQueueTable } from "../shared/ApprovalQueueTable";
+import { ReceiptButton } from "../shared/ReceiptButton";
+import { fetchDeposits, decideDeposit, type DepositRequest } from "./api";
+
+const statusOptions = [
+  { value: "PENDING", label: "Pending" },
+  { value: "APPROVED", label: "Approved" },
+  { value: "REJECTED", label: "Rejected" },
+  { value: "", label: "All statuses" },
+];
+
+export function DepositsAdminPage() {
+  const [status, setStatus] = useState<ApprovalStatus | "">("PENDING");
+  const [search, setSearch] = useState("");
+  const toast = useToast();
+  const queryClient = useQueryClient();
+  const role = useAuthStore((s) => s.user?.role);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["deposits", "admin", status],
+    queryFn: () => fetchDeposits({ status: status || undefined }),
+  });
+
+  const rows = useMemo(() => {
+    const results = data?.results ?? [];
+    if (!search.trim()) return results;
+    const q = search.toLowerCase();
+    return results.filter((r) => r.member_name.toLowerCase().includes(q));
+  }, [data, search]);
+
+  const decideMutation = useMutation({
+    mutationFn: ({ id, decision, note }: { id: number; decision: "APPROVE" | "REJECT"; note: string }) =>
+      decideDeposit(id, decision, note),
+    onSuccess: (_, vars) => {
+      toast.show({
+        tone: vars.decision === "APPROVE" ? "success" : "info",
+        title: vars.decision === "APPROVE" ? "Deposit approved" : "Deposit rejected",
+      });
+      queryClient.invalidateQueries({ queryKey: ["deposits"] });
+    },
+  });
+
+  const columns: Column<DepositRequest>[] = [
+    {
+      key: "member",
+      header: "Member",
+      render: (r) => r.member_name,
+      sortAccessor: (r) => r.member_name,
+    },
+    {
+      key: "date",
+      header: "Submitted",
+      render: (r) => formatDate(r.submitted_at),
+      className: "hidden whitespace-nowrap md:table-cell md:min-w-[9.5rem]",
+      sortAccessor: (r) => Date.parse(r.submitted_at),
+    },
+    {
+      key: "amount",
+      header: "Amount",
+      render: (r) => formatNaira(r.amount),
+      className: "text-right",
+      sortAccessor: (r) => Number(r.amount),
+    },
+  ];
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-sm text-sand-500 dark:text-sand-400">
+            Review and decide on member deposit requests.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <TextField
+            label="Search"
+            placeholder="Member name"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="sm:w-56"
+          />
+          <div className="w-48">
+            <Select
+              label="Status"
+              options={statusOptions}
+              value={status}
+              onChange={(e) => setStatus(e.target.value as ApprovalStatus | "")}
+            />
+          </div>
+        </div>
+      </div>
+
+      <ApprovalQueueTable
+        rows={rows}
+        isLoading={isLoading}
+        columns={columns}
+        canDecide={isFullAdmin(role)}
+        isDeciding={decideMutation.isPending}
+        onApprove={(row, note) =>
+          decideMutation.mutateAsync({ id: row.id, decision: "APPROVE", note })
+        }
+        onReject={(row, note) =>
+          decideMutation.mutateAsync({ id: row.id, decision: "REJECT", note })
+        }
+        renderDetails={(row) => (
+          <>
+            <div>
+              <p className="text-xs text-sand-400">Member</p>
+              <p className="text-sand-800 dark:text-sand-100">{row.member_name}</p>
+            </div>
+            <div>
+              <p className="text-xs text-sand-400">Amount</p>
+              <p className="text-sand-800 dark:text-sand-100">{formatNaira(row.amount)}</p>
+            </div>
+            {row.note && (
+              <div>
+                <p className="text-xs text-sand-400">Member's note</p>
+                <p className="text-sand-800 dark:text-sand-100">{row.note}</p>
+              </div>
+            )}
+            <div>
+              <p className="text-xs text-sand-400">Receipt</p>
+              <ReceiptButton filename={row.receipt_filename} />
+            </div>
+          </>
+        )}
+        emptyState={{
+          title: "No deposit requests",
+          description: "There are no deposit requests matching this filter.",
+        }}
+      />
+    </div>
+  );
+}

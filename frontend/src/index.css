@@ -1,0 +1,89 @@
+@import "tailwindcss";
+@import "@fontsource/fraunces/400.css";
+@import "@fontsource/fraunces/500.css";
+@import "@fontsource/fraunces/600.css";
+@import "@fontsource/fraunces/600-italic.css";
+@import "@fontsource/public-sans/400.css";
+@import "@fontsource/public-sans/500.css";
+@import "@fontsource/public-sans/600.css";
+@import "@fontsource/public-sans/700.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-sans: "Public Sans", ui-sans-serif, system-ui, sans-serif;
+
+  /* Pine -- primary brand: growth, trust, money */
+  --color-pine-50: #f0f7f4;
+  --color-pine-100: #d9ece2;
+  --color-pine-200: #b3d9c6;
+  --color-pine-300: #82bfa4;
+  --color-pine-400: #52a17f;
+  --color-pine-500: #327a5f;
+  --color-pine-600: #26604a;
+  --color-pine-700: #1f4d3c;
+  --color-pine-800: #1a3e31;
+  --color-pine-900: #15332a;
+  --color-pine-950: #0b1c17;
+
+  /* Gold -- accent: prosperity, naira, highlights */
+  --color-gold-50: #fdf8ec;
+  --color-gold-100: #faedc7;
+  --color-gold-200: #f5da8f;
+  --color-gold-300: #eec158;
+  --color-gold-400: #e3a730;
+  --color-gold-500: #cb8a1f;
+  --color-gold-600: #a86b18;
+  --color-gold-700: #855018;
+  --color-gold-800: #6d4119;
+  --color-gold-900: #5c3719;
+
+  /* Sand -- warm neutrals for backgrounds/text, replacing stark gray/zinc */
+  --color-sand-25: #fdfcfa;
+  --color-sand-50: #faf7f2;
+  --color-sand-100: #f3ede2;
+  --color-sand-200: #e6dcc9;
+  --color-sand-300: #d4c3a3;
+  --color-sand-400: #b8a179;
+  --color-sand-500: #96805c;
+  --color-sand-600: #776548;
+  --color-sand-700: #5c4d38;
+  --color-sand-800: #40352a;
+  --color-sand-900: #2a2219;
+  --color-sand-950: #191410;
+
+  /* Brick -- warm danger/reject red, not Tailwind's stock red */
+  --color-brick-50: #fbf1ef;
+  --color-brick-100: #f5ddd8;
+  --color-brick-400: #d4695a;
+  --color-brick-500: #c14033;
+  --color-brick-600: #a3352a;
+  --color-brick-700: #832a21;
+
+  --shadow-soft: 0 1px 2px rgba(25, 20, 16, 0.04), 0 4px 12px rgba(25, 20, 16, 0.06);
+  --shadow-lifted: 0 2px 4px rgba(25, 20, 16, 0.06), 0 12px 28px rgba(25, 20, 16, 0.1);
+}
+
+@layer base {
+  html {
+    color-scheme: light dark;
+  }
+
+  body {
+    @apply bg-sand-50 text-sand-900 font-sans antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  .dark body {
+    @apply bg-sand-950 text-sand-100;
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: var(--font-display);
+  }
+
+  ::selection {
+    @apply bg-gold-200 text-sand-900;
+  }
+}
