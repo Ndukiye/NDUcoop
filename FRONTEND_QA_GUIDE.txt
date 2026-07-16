@@ -61,31 +61,46 @@ Log in as: member1@example.com / MemberPass123!
   - 5 balance cards: Total assets, Shares, Compulsory savings, Deposits,
     Welfare. Total assets = Shares + Compulsory savings + Deposits (Welfare
     is deliberately excluded, per proposal §5).
+  - "Hide balances" (eye icon on the green band) masks every money figure
+    on the dashboard — click again to reveal.
   - "Quick actions" buttons should each take you to the matching page
-    (Request a deposit / withdrawal, Apply for a loan, Apply for a
-    commodity).
+    (Make a deposit / Apply for a withdrawal / View my loan / Apply for a
+    commodity — the loan action reads "Apply for a loan" when you have no
+    open loan).
+  - "Active loans & commodities" panel shows your running loan and any
+    approved commodity plans with repayment progress bars — each is
+    clickable through to its page.
+  - Bell icon (top right): notification feed with an unread-count badge
+    and a "Mark all as read" action (mock notifications).
   [Proposal §16 — member dashboard balance visibility]
 
 1.2  MY PROFILE  (click your name/avatar at the bottom of the sidebar)
   - Shows membership ID (with copy button), status, contact details.
-  - "Bank account details" form is pre-filled — change the bank name or
-    account number and click Save changes. You should get a success toast.
-  - Go back to the Dashboard, then Withdrawals → New withdrawal request —
-    the payout account field should default to whatever you just saved here.
+  - "Bank account details" form is pre-filled: Bank name is a dropdown of
+    Nigerian banks (fetched like a real bank-list API would be), plus
+    Account name and Account number fields. Change something and click
+    Save changes — you should get a success toast.
+  - Go back to Withdrawals → "Apply for a withdrawal" — the payout bank,
+    account name and number should default to whatever you just saved here.
   [Proposal §25 — "Members can edit their bank account details"]
 
 1.3  CONTRIBUTIONS  (/contributions)
-  - 4 stat cards showing the fixed monthly split (Shares ₦7,000 / Welfare
-    ₦200 / Compulsory Savings ₦3,000 / minimum total ₦10,200).
-  - A history table of your past months, each row has a Receipt download
-    button (mocked — shows a toast, no real file).
+  - Stat cards: "Minimum monthly total" (₦10,200) sits on top, with the
+    fixed split below it (Shares ₦7,000 / Welfare ₦200 / Compulsory
+    Savings ₦3,000).
+  - History table: search box above it, sortable Month/Total columns
+    (click a header to sort), pagination below (12 rows per page — the
+    seeded 18 months give you 2 pages to click through). Each row has a
+    Receipt download button (mocked — shows a toast, no real file).
+  - On a phone only Month, Total and Receipt columns show; the per-category
+    columns come back from tablet width up.
   - Numbers here should match your Dashboard balances (they're driven by the
     same underlying data — this was a real bug we found and fixed; worth
     double-checking).
   [Proposal §6 — monthly contribution split; §18 — monthly payment receipts]
 
 1.4  DEPOSITS  (/deposits)
-  - "New deposit request": form shows the cooperative's bank account details
+  - "Make a deposit": form shows the cooperative's bank account details
     (bank/account name/number, with a copy button on the number), an amount
     field, a required receipt upload, and an optional note.
   - Try submitting without a receipt — you should get an error toast telling
@@ -95,13 +110,14 @@ Log in as: member1@example.com / MemberPass123!
   [Proposal §7 — full deposit process]
 
 1.5  WITHDRAWALS  (/withdrawals)
-  - "New withdrawal request": shows a banner telling you your withdrawal cap.
-    Since this test member has an active loan, the cap should be reduced
-    (not just your full deposit balance) — the banner explains why.
-  - Payout account number field is pre-filled from your Profile, editable
-    for this request only ("confirm or edit account number").
-  - History table shows past requests with their payout account number and
-    status.
+  - "Apply for a withdrawal": shows a banner telling you your withdrawal
+    cap. Since this test member has an active loan, the cap should be
+    reduced (not just your full deposit balance) — the banner explains why
+    in plain language.
+  - Payout bank (dropdown of Nigerian banks), account name and account
+    number are pre-filled from your Profile, editable for this request
+    only ("confirm or edit").
+  - History table shows past requests with their payout account and status.
   [Proposal §8 — full withdrawal process, including the active-loan cap rule]
 
 1.6  LOANS  (/loans)
@@ -117,9 +133,11 @@ Log in as: member1@example.com / MemberPass123!
         receipt upload — this is the "repay any time by bank transfer"
         workflow (separate from the automatic monthly salary deduction
         shown in the "Repayment history" table below).
-      - "Top up this loan" button → shows a live calculation preview
-        (interest, fee, old balance cleared, final amount disbursed) as you
-        type an amount.
+      - "Top up this loan" button → opens the same 3-step application
+        wizard as a normal loan (amount, guarantors, review) with a
+        top-up banner: the amount must beat your current outstanding
+        balance, and the live preview shows interest, fee, old balance
+        cleared, and the final amount disbursed (proposal §14 formula).
       - "Your repayment requests" table shows anything you've submitted via
         "Make a repayment", with its approval status.
   - "Guarantor requests" tab (next to "My loans"): shows loan requests where
@@ -141,8 +159,9 @@ Log in as: member1@example.com / MemberPass123!
    IDs... system... brings out their name for confirmation"]
 
 1.8  COMMODITIES  (/commodities)
-  - Catalog cards for each item (Rice, Vegetable Oil, Beans, Sugar), showing
-    price, stock level, and an Apply button (disabled when out of stock).
+  - Catalog cards for each item (Rice, Vegetable Oil, Beans, Sugar): icon
+    chip, price per unit, In stock / Out of stock badge, a stock-level bar,
+    and an Apply button (disabled when out of stock).
   - "My applications" table: status, a repayment-progress bar once approved,
     a Receipt button, and a "Repay" button (only when there's an approved
     plan with money still owing) that opens the same
@@ -279,10 +298,10 @@ KNOWN, DELIBERATE SIMPLIFICATIONS (not bugs)
     a filename is captured/shown but no file is actually stored or
     generated. This becomes real once the backend's private file storage
     (Phase 3+) is built.
-  - Wide tables on mobile scroll horizontally rather than reflowing into
-    stacked cards — a deliberate, standard mobile pattern, not a layout bug.
-  - The loan top-up flow is a single form + calculation preview, not a full
-    second wizard.
+  - On phones, tables hide their secondary columns (decision notes, dates
+    on admin queues, per-category amounts, etc.) and receipt buttons shrink
+    to just the download icon — everything reappears from tablet width up.
+    This is deliberate mobile-first design, not missing data.
   - "Recent transactions" and "Recent approvals" (two separate items in the
     proposal's admin dashboard list) are combined into one feed, since there
     is no separate raw "transaction" concept in the mock data yet.
