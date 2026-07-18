@@ -61,7 +61,7 @@ export function LoginPage() {
           className="pointer-events-none absolute -bottom-32 -left-16 h-80 w-80 rounded-full border border-gold-400/20"
         />
 
-        <Logo mark className="relative" />
+        <Logo mark size="lg" className="relative" />
 
         <div className="relative max-w-md">
           <p className="font-display text-4xl font-medium italic leading-tight text-pine-50">
@@ -110,7 +110,7 @@ export function LoginPage() {
 
         <div className="relative flex flex-1 flex-col justify-center px-5 py-10 lg:flex-none lg:p-0">
           <div className="mx-auto mb-7 w-full max-w-sm lg:hidden">
-            <Logo className="[&_span]:text-pine-50" />
+            <Logo size="lg" className="[&_span]:text-pine-50" />
           </div>
 
           <div className="mx-auto w-full max-w-sm rounded-3xl bg-sand-25 p-6 shadow-lifted ring-1 ring-white/10 dark:bg-sand-900 sm:p-7 lg:rounded-none lg:bg-transparent lg:p-0 lg:shadow-none lg:ring-0 lg:dark:bg-transparent">
