@@ -6,6 +6,7 @@ import { StatCard } from "../../components/StatCard";
 import { StatusBadge } from "../../components/StatusBadge";
 import { Avatar } from "../../components/Avatar";
 import { Button } from "../../components/Button";
+import { CopyButton } from "../../components/CopyButton";
 import { Icon } from "../../components/Icon";
 import { DataTable, type Column } from "../../components/Table";
 import { EmptyState } from "../../components/EmptyState";
@@ -19,7 +20,7 @@ import {
   reverseRepayment,
 } from "./api";
 import { useAuthStore } from "../../store/auth";
-import { isFullAdmin, isMember } from "../../lib/roles";
+import { isAnyAdmin, isFullAdmin, isMember } from "../../lib/roles";
 import { Textarea } from "../../components/Textarea";
 import { Modal } from "../../components/Modal";
 import { RepaymentRequestModal } from "../shared/RepaymentRequestModal";
@@ -135,6 +136,8 @@ export function LoanDetailPage() {
     { key: "status", header: "Status", render: (r) => <StatusBadge status={r.status} /> },
   ];
 
+  const loanMember = loan ? findMember(loan.member_id) : undefined;
+
   if (!isLoading && !loan) {
     return (
       <EmptyState
@@ -160,11 +163,23 @@ export function LoanDetailPage() {
       </button>
 
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <h2 className="font-display text-xl font-medium text-sand-900 dark:text-sand-50">
-            {loan?.product_name ?? "Loading…"}
-          </h2>
-          {loan && <StatusBadge status={loan.status} />}
+        <div>
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="font-display text-xl font-medium text-sand-900 dark:text-sand-50">
+              {!loan
+                ? "Loading…"
+                : isAnyAdmin(role)
+                  ? `${loan.member_name.split(" ")[0]}'s ${loan.product_name} loan`
+                  : loan.product_name}
+            </h2>
+            {loan && <StatusBadge status={loan.status} />}
+          </div>
+          {loan && isAnyAdmin(role) && loanMember && (
+            <p className="mt-1 flex items-center gap-1.5 text-sm text-sand-500 dark:text-sand-400">
+              {loan.member_name} &middot; {loanMember.membership_id}
+              <CopyButton value={loanMember.membership_id} />
+            </p>
+          )}
         </div>
         {loan && (loan.status === "ACTIVE" || loan.status === "COMPLETED") && (
           <div className="flex flex-wrap gap-2">
