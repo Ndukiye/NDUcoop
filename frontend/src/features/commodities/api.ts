@@ -1,4 +1,5 @@
 import type { Paginated, ApprovalStatus } from "../../lib/types";
+import { currentActorOffice } from "../../lib/actor";
 import { delay } from "../../mocks/delay";
 import {
   commodityTypes,
@@ -6,6 +7,7 @@ import {
   addCommodityApplication,
   decideCommodityApplication,
   updateCommodityType,
+  addCommodityType,
   type MockCommodityType,
   type MockCommodityApplication,
 } from "../../mocks/commodities";
@@ -73,7 +75,7 @@ export async function decideCommodity(
   decision: "APPROVE" | "REJECT",
   note: string,
 ): Promise<CommodityApplication | null> {
-  const app = decideCommodityApplication(id, decision, note, "Current admin");
+  const app = decideCommodityApplication(id, decision, note, currentActorOffice());
   return delay(app ? enrich(app) : null);
 }
 
@@ -125,7 +127,7 @@ export async function decideCommodityRepaymentRequest(
   decision: "APPROVE" | "REJECT",
   note: string,
 ): Promise<void> {
-  decideRepaymentRequest(id, decision, note, "Current admin");
+  decideRepaymentRequest(id, decision, note, currentActorOffice());
   return delay(undefined);
 }
 
@@ -140,4 +142,15 @@ export async function saveCommodityType(
 ): Promise<MockCommodityType | null> {
   const t = updateCommodityType(id, updates);
   return delay(t ?? null);
+}
+
+export async function createCommodityType(input: {
+  name: string;
+  unit: string;
+  cost_price: string;
+  selling_price: string;
+  current_stock_quantity: number;
+  default_max_duration_months: number;
+}): Promise<MockCommodityType> {
+  return delay(addCommodityType(input));
 }

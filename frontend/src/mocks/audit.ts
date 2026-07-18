@@ -26,7 +26,7 @@ function daysAgo(n: number) {
 export const auditEntries: MockAuditEntry[] = [
   {
     id: nextId++,
-    actor_name: "Amaka Okafor",
+    actor_name: "President",
     actor_role: "Full admin",
     action: "DEPOSIT_APPROVED",
     target_member_id: 3,
@@ -37,7 +37,7 @@ export const auditEntries: MockAuditEntry[] = [
   },
   {
     id: nextId++,
-    actor_name: "Tunde Bakare",
+    actor_name: "Treasurer",
     actor_role: "Full admin",
     action: "DEPOSIT_REJECTED",
     target_member_id: 4,
@@ -48,7 +48,7 @@ export const auditEntries: MockAuditEntry[] = [
   },
   {
     id: nextId++,
-    actor_name: "Amaka Okafor",
+    actor_name: "President",
     actor_role: "Full admin",
     action: "WITHDRAWAL_APPROVED",
     target_member_id: 3,
@@ -59,7 +59,7 @@ export const auditEntries: MockAuditEntry[] = [
   },
   {
     id: nextId++,
-    actor_name: "Tunde Bakare",
+    actor_name: "Treasurer",
     actor_role: "Full admin",
     action: "WITHDRAWAL_REJECTED",
     target_member_id: 1,
@@ -70,7 +70,7 @@ export const auditEntries: MockAuditEntry[] = [
   },
   {
     id: nextId++,
-    actor_name: "Amaka Okafor",
+    actor_name: "President",
     actor_role: "Full admin",
     action: "LOAN_APPROVED",
     target_member_id: 1,
@@ -81,7 +81,7 @@ export const auditEntries: MockAuditEntry[] = [
   },
   {
     id: nextId++,
-    actor_name: "Tunde Bakare",
+    actor_name: "Treasurer",
     actor_role: "Full admin",
     action: "MEMBER_STATUS_CHANGED",
     target_member_id: 24,
@@ -92,7 +92,7 @@ export const auditEntries: MockAuditEntry[] = [
   },
   {
     id: nextId++,
-    actor_name: "Amaka Okafor",
+    actor_name: "President",
     actor_role: "Full admin",
     action: "MEMBER_STATUS_CHANGED",
     target_member_id: 26,
@@ -103,7 +103,7 @@ export const auditEntries: MockAuditEntry[] = [
   },
   {
     id: nextId++,
-    actor_name: "Amaka Okafor",
+    actor_name: "President",
     actor_role: "Full admin",
     action: "MEMBER_STATUS_CHANGED",
     target_member_id: 22,
@@ -114,7 +114,7 @@ export const auditEntries: MockAuditEntry[] = [
   },
   {
     id: nextId++,
-    actor_name: "Amaka Okafor",
+    actor_name: "President",
     actor_role: "Full admin",
     action: "MEMBER_STATUS_CHANGED",
     target_member_id: 23,
@@ -125,7 +125,7 @@ export const auditEntries: MockAuditEntry[] = [
   },
   {
     id: nextId++,
-    actor_name: "Ifeoma Chukwu",
+    actor_name: "Ebiere Owei",
     actor_role: "Member",
     action: "BANK_DETAILS_UPDATED",
     target_member_id: 1,
@@ -136,7 +136,7 @@ export const auditEntries: MockAuditEntry[] = [
   },
   {
     id: nextId++,
-    actor_name: "Amaka Okafor",
+    actor_name: "President",
     actor_role: "Full admin",
     action: "MEMBER_ONBOARDED",
     target_member_id: 1,
@@ -147,7 +147,7 @@ export const auditEntries: MockAuditEntry[] = [
   },
   {
     id: nextId++,
-    actor_name: "Amaka Okafor",
+    actor_name: "President",
     actor_role: "Full admin",
     action: "MEMBER_ONBOARDED",
     target_member_id: 2,
@@ -167,6 +167,7 @@ export const AUDIT_ACTION_LABELS: Record<string, string> = {
   LOAN_REJECTED: "Loan rejected",
   LOAN_TOP_UP_REQUESTED: "Loan top-up requested",
   LOAN_REPAYMENT_APPROVED: "Loan repayment approved",
+  LOAN_REPAYMENT_REVERSED: "Loan repayment reversed",
   LOAN_REPAYMENT_REJECTED: "Loan repayment rejected",
   COMMODITY_APPROVED: "Commodity application approved",
   COMMODITY_REJECTED: "Commodity application rejected",
@@ -175,6 +176,7 @@ export const AUDIT_ACTION_LABELS: Record<string, string> = {
   MEMBER_ONBOARDED: "Member onboarded",
   MEMBER_EDITED: "Member details edited",
   MEMBER_STATUS_CHANGED: "Member status changed",
+  MEMBER_ASSET_CLEARED: "Member balances cleared",
   BANK_DETAILS_UPDATED: "Bank details updated",
   CONTRIBUTION_POSTED: "Contributions posted",
   CONTRIBUTION_CORRECTED: "Contribution corrected",

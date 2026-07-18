@@ -56,7 +56,7 @@ export const depositRequests: MockDepositRequest[] = [
     status: "APPROVED",
     submitted_at: iso(10),
     decided_at: iso(9),
-    decided_by: "Amaka Okafor",
+    decided_by: "President",
     decision_note: "Confirmed with finance",
   },
   {
@@ -68,7 +68,7 @@ export const depositRequests: MockDepositRequest[] = [
     status: "APPROVED",
     submitted_at: iso(35),
     decided_at: iso(34),
-    decided_by: "Amaka Okafor",
+    decided_by: "President",
     decision_note: null,
   },
   {
@@ -80,7 +80,7 @@ export const depositRequests: MockDepositRequest[] = [
     status: "REJECTED",
     submitted_at: iso(20),
     decided_at: iso(19),
-    decided_by: "Tunde Bakare",
+    decided_by: "Treasurer",
     decision_note: "Amount exceeds verified income for this period",
   },
   {
@@ -104,7 +104,7 @@ export const depositRequests: MockDepositRequest[] = [
     status: "APPROVED",
     submitted_at: iso(48),
     decided_at: iso(47),
-    decided_by: "Amaka Okafor",
+    decided_by: "President",
     decision_note: null,
   },
   {
@@ -116,7 +116,7 @@ export const depositRequests: MockDepositRequest[] = [
     status: "REJECTED",
     submitted_at: iso(60),
     decided_at: iso(59),
-    decided_by: "Tunde Bakare",
+    decided_by: "Treasurer",
     decision_note: "Duplicate of an already-posted deposit",
   },
 ];

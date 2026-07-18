@@ -1,4 +1,5 @@
 import type { MemberStatus } from "../lib/types";
+import { currentActorOffice } from "../lib/actor";
 import { logAuditEntry } from "./audit";
 
 export interface MockMember {
@@ -57,34 +58,34 @@ interface Seed {
 }
 
 const seeds: Seed[] = [
-  { first: "Ifeoma", last: "Chukwu", months: 18, deposit: 145000, status: "ACTIVE" },
-  { first: "Amaka", last: "Okafor", months: 30, deposit: 320000, status: "ACTIVE" },
-  { first: "Tunde", last: "Bakare", months: 24, deposit: 210500, status: "ACTIVE" },
-  { first: "Ngozi", last: "Eze", months: 12, deposit: 88000, status: "ACTIVE" },
-  { first: "Emeka", last: "Nwosu", months: 20, deposit: 156300, status: "ACTIVE" },
-  { first: "Bisi", last: "Adeyemi", months: 9, deposit: 61000, status: "ACTIVE" },
-  { first: "Chidi", last: "Okoro", months: 15, deposit: 102750, status: "ACTIVE" },
-  { first: "Funmilayo", last: "Ogunleye", months: 27, deposit: 275400, status: "ACTIVE" },
-  { first: "Uche", last: "Onyekwere", months: 6, deposit: 32000, status: "ACTIVE" },
-  { first: "Aisha", last: "Mohammed", months: 33, deposit: 401200, status: "ACTIVE" },
-  { first: "Segun", last: "Balogun", months: 11, deposit: 74800, status: "ACTIVE" },
-  { first: "Chiamaka", last: "Obi", months: 22, deposit: 189000, status: "ACTIVE" },
-  { first: "Yakubu", last: "Sani", months: 17, deposit: 121300, status: "ACTIVE" },
-  { first: "Blessing", last: "Ibe", months: 14, deposit: 98600, status: "ACTIVE" },
-  { first: "Kelechi", last: "Anyanwu", months: 26, deposit: 245000, status: "ACTIVE" },
-  { first: "Halima", last: "Abdullahi", months: 8, deposit: 45500, status: "ACTIVE" },
-  { first: "Obinna", last: "Eke", months: 19, deposit: 137700, status: "ACTIVE" },
-  { first: "Temitope", last: "Adebayo", months: 31, deposit: 356900, status: "ACTIVE" },
-  { first: "Grace", last: "Udo", months: 13, deposit: 91200, status: "ACTIVE" },
-  { first: "Musa", last: "Ibrahim", months: 25, deposit: 224000, status: "ACTIVE" },
-  { first: "Chinelo", last: "Nnamdi", months: 4, deposit: 18000, status: "INACTIVE" },
-  { first: "Ayodele", last: "Fashola", months: 36, deposit: 512000, status: "RETIRED" },
-  { first: "Patience", last: "Etim", months: 28, deposit: 298000, status: "RETIRED" },
-  { first: "Godwin", last: "Attah", months: 10, deposit: 51000, status: "SUSPENDED" },
-  { first: "Rita", last: "Nkemdirim", months: 5, deposit: 22500, status: "INACTIVE" },
-  { first: "Lawal", last: "Garba", months: 16, deposit: 108900, status: "TERMINATED" },
-  { first: "Ifeanyi", last: "Madu", months: 21, deposit: 168400, status: "ACTIVE" },
-  { first: "Zainab", last: "Yusuf", months: 7, deposit: 38700, status: "ACTIVE" },
+  { first: "Ebiere", last: "Owei", months: 18, deposit: 145000, status: "ACTIVE" },
+  { first: "Preye", last: "Ekiyor", months: 30, deposit: 320000, status: "ACTIVE" },
+  { first: "Tonbra", last: "Seiyefa", months: 24, deposit: 210500, status: "ACTIVE" },
+  { first: "Ibinabo", last: "George", months: 12, deposit: 88000, status: "ACTIVE" },
+  { first: "Tamuno", last: "Amachree", months: 20, deposit: 156300, status: "ACTIVE" },
+  { first: "Boma", last: "Warmate", months: 9, deposit: 61000, status: "ACTIVE" },
+  { first: "Sotonye", last: "Fubara", months: 15, deposit: 102750, status: "ACTIVE" },
+  { first: "Dienye", last: "Harry", months: 27, deposit: 275400, status: "ACTIVE" },
+  { first: "Tari", last: "Abadi", months: 6, deposit: 32000, status: "ACTIVE" },
+  { first: "Timipre", last: "Igali", months: 33, deposit: 401200, status: "ACTIVE" },
+  { first: "Dagogo", last: "Jack", months: 11, deposit: 74800, status: "ACTIVE" },
+  { first: "Ayebaemi", last: "Spiff", months: 22, deposit: 189000, status: "ACTIVE" },
+  { first: "Ebipade", last: "Clark", months: 17, deposit: 121300, status: "ACTIVE" },
+  { first: "Oyinkuro", last: "Sasime", months: 14, deposit: 98600, status: "ACTIVE" },
+  { first: "Perekeme", last: "Ndiomu", months: 26, deposit: 245000, status: "ACTIVE" },
+  { first: "Ekiye", last: "Alabo", months: 8, deposit: 45500, status: "ACTIVE" },
+  { first: "Tubotamuno", last: "Pepple", months: 19, deposit: 137700, status: "ACTIVE" },
+  { first: "Diseye", last: "Poweide", months: 31, deposit: 356900, status: "ACTIVE" },
+  { first: "Ayibanua", last: "Kemefa", months: 13, deposit: 91200, status: "ACTIVE" },
+  { first: "Ebikake", last: "Etolor", months: 25, deposit: 224000, status: "ACTIVE" },
+  { first: "Kemepade", last: "Diri", months: 4, deposit: 18000, status: "INACTIVE" },
+  { first: "Tekena", last: "West", months: 36, deposit: 512000, status: "RETIRED" },
+  { first: "Ibiere", last: "Banigo", months: 28, deposit: 298000, status: "RETIRED" },
+  { first: "Opuada", last: "Alale", months: 10, deposit: 51000, status: "SUSPENDED" },
+  { first: "Erebi", last: "Timiyan", months: 5, deposit: 22500, status: "INACTIVE" },
+  { first: "Seiyefa", last: "Brisibe", months: 16, deposit: 108900, status: "TERMINATED" },
+  { first: "Nengi", last: "Allison", months: 21, deposit: 168400, status: "ACTIVE" },
+  { first: "Tamara", last: "Ikoli", months: 7, deposit: 38700, status: "ACTIVE" },
 ];
 
 let nextId = 1;
@@ -104,7 +105,7 @@ export const members: MockMember[] = seeds.map((s, i) => {
     phone: `080${String(10000000 + id * 137).slice(0, 8)}`,
     bank_name: banks[i % banks.length],
     bank_account_name: `${s.first} ${s.last}`,
-    bank_account_number: String(1000000000 + id * 9137),
+    bank_account_number: "1111111111",
     status: s.status,
     shares_balance: shares.toFixed(2),
     welfare_balance: (s.months * 200).toFixed(2),
@@ -203,6 +204,42 @@ export function updateMemberBankDetails(
   return member;
 }
 
+/**
+ * Proposal §25: when a member terminates membership and has been fully paid
+ * out, an admin clears the member's total asset in the month of payment. The
+ * member stays on record, tagged TERMINATED, with balances zeroed.
+ */
+export function terminateMember(
+  id: number,
+  reason: string,
+  actorName: string,
+): MockMember | undefined {
+  const member = findMember(id);
+  if (!member) return undefined;
+  const previousValue = {
+    status: member.status,
+    shares_balance: member.shares_balance,
+    welfare_balance: member.welfare_balance,
+    compulsory_savings_balance: member.compulsory_savings_balance,
+    deposit_balance: member.deposit_balance,
+  };
+  member.status = "TERMINATED";
+  member.shares_balance = "0.00";
+  member.welfare_balance = "0.00";
+  member.compulsory_savings_balance = "0.00";
+  member.deposit_balance = "0.00";
+  logAuditEntry({
+    actorName,
+    actorRole: "Full admin",
+    action: "MEMBER_ASSET_CLEARED",
+    targetMemberId: member.id,
+    previousValue,
+    newValue: { status: "TERMINATED", total_asset: "0.00" },
+    reason,
+  });
+  return member;
+}
+
 export function addMember(input: {
   first_name: string;
   last_name: string;
@@ -233,7 +270,7 @@ export function addMember(input: {
   };
   members.unshift(member);
   logAuditEntry({
-    actorName: "Current admin",
+    actorName: currentActorOffice(),
     actorRole: "Full admin",
     action: "MEMBER_ONBOARDED",
     targetMemberId: member.id,

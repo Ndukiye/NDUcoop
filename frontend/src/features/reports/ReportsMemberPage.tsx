@@ -29,7 +29,7 @@ export function ReportsMemberPage() {
         format: "PDF",
         periodLabel: period,
         scope: "MEMBER",
-        generatedBy: "Ifeoma Chukwu",
+        generatedBy: "Ebiere Owei",
         memberId: 1,
       }),
     onSuccess: () => {

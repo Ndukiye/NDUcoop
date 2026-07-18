@@ -1,4 +1,5 @@
 import type { Paginated, MemberStatus } from "../../lib/types";
+import { currentActorOffice } from "../../lib/actor";
 import { delay } from "../../mocks/delay";
 import {
   members,
@@ -6,6 +7,7 @@ import {
   addMember,
   updateMemberStatus,
   updateMemberDetails,
+  terminateMember,
   totalAsset,
   type MockMember,
 } from "../../mocks/members";
@@ -78,7 +80,7 @@ export async function setMemberStatus(
   status: MemberStatus,
   reason: string,
 ): Promise<AdminMember | null> {
-  const m = updateMemberStatus(id, status, reason, "Current admin");
+  const m = updateMemberStatus(id, status, reason, currentActorOffice());
   return delay(m ? toAdminMember(m) : null);
 }
 
@@ -89,6 +91,14 @@ export interface EditMemberInput {
 }
 
 export async function editMember(id: number, input: EditMemberInput): Promise<AdminMember | null> {
-  const m = updateMemberDetails(id, input, "Current admin");
+  const m = updateMemberDetails(id, input, currentActorOffice());
+  return delay(m ? toAdminMember(m) : null);
+}
+
+export async function terminateMemberAccount(
+  id: number,
+  reason: string,
+): Promise<AdminMember | null> {
+  const m = terminateMember(id, reason, currentActorOffice());
   return delay(m ? toAdminMember(m) : null);
 }

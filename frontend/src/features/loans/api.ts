@@ -1,7 +1,16 @@
 import type { Paginated, LoanStatus } from "../../lib/types";
+import { currentActorOffice } from "../../lib/actor";
 import { delay } from "../../mocks/delay";
 import { loanProducts, calculateLoanBreakdown, type MockLoanProduct } from "../../mocks/loanProducts";
-import { loans, findLoan, addLoan, decideLoan, requestTopUp, type MockLoan } from "../../mocks/loans";
+import {
+  loans,
+  findLoan,
+  addLoan,
+  decideLoan,
+  requestTopUp,
+  reverseLoanRepayment,
+  type MockLoan,
+} from "../../mocks/loans";
 import { guarantorRequestsForLoan, createGuarantorRequestsForLoan, type MockGuarantorRequest } from "../../mocks/guarantors";
 import { findMember, findMemberByMembershipId, totalAsset as memberTotalAsset } from "../../mocks/members";
 import {
@@ -110,7 +119,7 @@ export async function decideLoanApplication(
   decision: "APPROVE" | "REJECT",
   note: string,
 ): Promise<LoanWithMember | null> {
-  const loan = decideLoan(id, decision, note, "Current admin");
+  const loan = decideLoan(id, decision, note, currentActorOffice());
   return delay(loan ? enrich(loan) : null);
 }
 
@@ -176,6 +185,15 @@ export async function decideLoanRepaymentRequest(
   decision: "APPROVE" | "REJECT",
   note: string,
 ): Promise<void> {
-  decideRepaymentRequest(id, decision, note, "Current admin");
+  decideRepaymentRequest(id, decision, note, currentActorOffice());
   return delay(undefined);
+}
+
+export async function reverseRepayment(
+  loanId: number,
+  repaymentId: string,
+  reason: string,
+): Promise<LoanWithMember | null> {
+  const loan = reverseLoanRepayment(loanId, repaymentId, reason, currentActorOffice());
+  return delay(loan ? enrich(loan) : null);
 }

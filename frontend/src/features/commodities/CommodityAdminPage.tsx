@@ -21,6 +21,7 @@ import {
   type CommodityApplication,
 } from "./api";
 import { EditCommodityModal } from "./EditCommodityModal";
+import { AddCommodityModal } from "./AddCommodityModal";
 import type { MockCommodityType } from "../../mocks/commodities";
 
 const statusOptions = [
@@ -33,6 +34,7 @@ const statusOptions = [
 export function CommodityAdminPage() {
   const [status, setStatus] = useState<ApprovalStatus | "">("PENDING");
   const [search, setSearch] = useState("");
+  const [addOpen, setAddOpen] = useState(false);
   const [repaymentSearch, setRepaymentSearch] = useState("");
   const [editing, setEditing] = useState<MockCommodityType | null>(null);
   const toast = useToast();
@@ -168,7 +170,14 @@ export function CommodityAdminPage() {
       </div>
 
       <div>
-        <p className="mb-3 text-sm font-medium text-sand-500 dark:text-sand-400">Catalog</p>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm font-medium text-sand-500 dark:text-sand-400">Catalog</p>
+          {isFullAdmin(role) && (
+            <Button size="sm" onClick={() => setAddOpen(true)}>
+              <Icon name="plus" className="h-4 w-4" /> Add commodity
+            </Button>
+          )}
+        </div>
         <DataTable
           columns={typeColumns}
           rows={types ?? []}
@@ -178,30 +187,32 @@ export function CommodityAdminPage() {
       </div>
 
       <div>
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm font-medium text-sand-500 dark:text-sand-400">Applications</p>
-          <div className="flex flex-wrap gap-3">
-            <TextField
-              label="Search"
-              placeholder="Member or item"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="sm:w-56"
-            />
-            <div className="w-48">
-              <Select
-                label="Status"
-                options={statusOptions}
-                value={status}
-                onChange={(e) => setStatus(e.target.value as ApprovalStatus | "")}
-              />
-            </div>
-          </div>
-        </div>
+        <p className="mb-3 text-sm font-medium text-sand-500 dark:text-sand-400">Applications</p>
         <ApprovalQueueTable
           rows={appRows}
           isLoading={appsLoading}
           columns={appColumns}
+          toolbar={
+            <>
+              <TextField
+                label="Search"
+                hideLabel
+                placeholder="Search member or item"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full sm:w-72"
+              />
+              <div className="w-full sm:w-48">
+                <Select
+                  label="Status"
+                  hideLabel
+                  options={statusOptions}
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value as ApprovalStatus | "")}
+                />
+              </div>
+            </>
+          }
           canDecide={isFullAdmin(role)}
           isDeciding={decideMutation.isPending}
           onApprove={(row, note) =>
@@ -236,21 +247,22 @@ export function CommodityAdminPage() {
       </div>
 
       <div>
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm font-medium text-sand-500 dark:text-sand-400">
-            Repayment requests
-          </p>
-          <TextField
-            label="Search"
-            placeholder="Member name"
-            value={repaymentSearch}
-            onChange={(e) => setRepaymentSearch(e.target.value)}
-            className="sm:w-56"
-          />
-        </div>
+        <p className="mb-3 text-sm font-medium text-sand-500 dark:text-sand-400">
+          Repayment requests
+        </p>
         <RepaymentRequestsQueue
           rows={repaymentRows}
           isLoading={repaymentRequestsLoading}
+          toolbar={
+            <TextField
+              label="Search"
+              hideLabel
+              placeholder="Search member name"
+              value={repaymentSearch}
+              onChange={(e) => setRepaymentSearch(e.target.value)}
+              className="w-full sm:w-72"
+            />
+          }
           canDecide={isFullAdmin(role)}
           isDeciding={decideRepaymentMutation.isPending}
           onApprove={(row, note) =>
@@ -263,6 +275,7 @@ export function CommodityAdminPage() {
       </div>
 
       <EditCommodityModal type={editing} onClose={() => setEditing(null)} />
+      <AddCommodityModal open={addOpen} onClose={() => setAddOpen(false)} />
     </div>
   );
 }

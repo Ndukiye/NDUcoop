@@ -88,39 +88,45 @@ export function MembersListPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_220px]">
-        <TextField
-          label="Search"
-          placeholder="Name, membership ID, or email"
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
-        />
-        <Select
-          label="Status"
-          options={statusOptions}
-          value={status}
-          onChange={(e) => {
-            setStatus(e.target.value as MemberStatus | "");
-            setPage(1);
-          }}
-        />
-      </div>
-
       <DataTable
         columns={columns}
         rows={data?.results ?? []}
         rowKey={(m) => m.id}
         isLoading={isLoading}
         onRowClick={(m) => navigate(`/members/${m.id}`)}
+        toolbar={
+          <>
+            <TextField
+              label="Search"
+              hideLabel
+              placeholder="Search name, membership ID, or email"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              className="w-full sm:w-72"
+            />
+            <div className="w-full sm:w-48">
+              <Select
+                label="Status"
+                hideLabel
+                options={statusOptions}
+                value={status}
+                onChange={(e) => {
+                  setStatus(e.target.value as MemberStatus | "");
+                  setPage(1);
+                }}
+              />
+            </div>
+          </>
+        }
+        footer={<Pagination page={page} pageCount={pageCount} onPageChange={setPage} />}
         emptyState={{
           title: "No members found",
           description: "Try a different search term or status filter.",
         }}
       />
-      <Pagination page={page} pageCount={pageCount} onPageChange={setPage} />
 
       <OnboardMemberModal
         open={onboardOpen}

@@ -16,7 +16,12 @@ import {
   fetchLoanGuarantors,
   submitLoanRepaymentRequest,
   fetchLoanRepaymentRequestsForLoan,
+  reverseRepayment,
 } from "./api";
+import { useAuthStore } from "../../store/auth";
+import { isFullAdmin, isMember } from "../../lib/roles";
+import { Textarea } from "../../components/Textarea";
+import { Modal } from "../../components/Modal";
 import { RepaymentRequestModal } from "../shared/RepaymentRequestModal";
 import { GenerateReceiptButton } from "../shared/GenerateReceiptButton";
 import { findMember } from "../../mocks/members";
@@ -29,6 +34,9 @@ export function LoanDetailPage() {
   const navigate = useNavigate();
   const loanId = Number(id);
   const [repayOpen, setRepayOpen] = useState(false);
+  const [reversing, setReversing] = useState<MockRepayment | null>(null);
+  const [reverseReason, setReverseReason] = useState("");
+  const role = useAuthStore((s) => s.user?.role);
   const toast = useToast();
   const queryClient = useQueryClient();
 
@@ -63,6 +71,21 @@ export function LoanDetailPage() {
     },
   });
 
+  const reverseMutation = useMutation({
+    mutationFn: (input: { repaymentId: string; reason: string }) =>
+      reverseRepayment(loanId, input.repaymentId, input.reason),
+    onSuccess: () => {
+      toast.show({
+        tone: "success",
+        title: "Repayment reversed",
+        description: "The amount was added back to the outstanding balance.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["loans"] });
+      setReversing(null);
+      setReverseReason("");
+    },
+  });
+
   const repaymentColumns: Column<MockRepayment>[] = [
     {
       key: "date",
@@ -81,6 +104,18 @@ export function LoanDetailPage() {
     { key: "type", header: "Type", render: (r) => (r.is_manual ? "Manual" : "Salary deduction"), className: "hidden md:table-cell" },
     { key: "receipt", header: "Receipt", render: () => <GenerateReceiptButton /> },
   ];
+  if (isFullAdmin(role)) {
+    repaymentColumns.push({
+      key: "actions",
+      header: "",
+      className: "text-right",
+      render: (r) => (
+        <Button size="sm" variant="ghost" onClick={() => setReversing(r)}>
+          Reverse
+        </Button>
+      ),
+    });
+  }
 
   const requestColumns: Column<EnrichedRepaymentRequest>[] = [
     {
@@ -134,7 +169,7 @@ export function LoanDetailPage() {
         {loan && (loan.status === "ACTIVE" || loan.status === "COMPLETED") && (
           <div className="flex flex-wrap gap-2">
             <GenerateReceiptButton label="Disbursement receipt" iconOnlyOnMobile={false} />
-            {loan.status === "ACTIVE" && (
+            {loan.status === "ACTIVE" && isMember(role) && (
               <>
                 <Button onClick={() => setRepayOpen(true)}>
                   <Icon name="arrow-up" className="h-4 w-4" /> Make a repayment
@@ -224,6 +259,45 @@ export function LoanDetailPage() {
         onSubmit={(input) => repayMutation.mutate(input)}
       />
 
+      <Modal
+        open={!!reversing}
+        onClose={() => setReversing(null)}
+        title="Reverse repayment"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setReversing(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              disabled={!reverseReason.trim()}
+              loading={reverseMutation.isPending}
+              onClick={() =>
+                reversing &&
+                reverseMutation.mutate({ repaymentId: reversing.id, reason: reverseReason })
+              }
+            >
+              Confirm reversal
+            </Button>
+          </>
+        }
+      >
+        <div className="flex flex-col gap-4">
+          <p className="text-sm text-sand-600 dark:text-sand-300">
+            This removes the {reversing ? formatNaira(reversing.amount) : ""} repayment of{" "}
+            {reversing ? formatDate(reversing.paid_at) : ""} and adds the amount back to the
+            outstanding balance — for salary deductions that failed or were recorded
+            incorrectly. The reversal is recorded in the audit trail.
+          </p>
+          <Textarea
+            label="Reason"
+            required
+            placeholder="Why this repayment is being reversed"
+            value={reverseReason}
+            onChange={(e) => setReverseReason(e.target.value)}
+          />
+        </div>
+      </Modal>
     </div>
   );
 }

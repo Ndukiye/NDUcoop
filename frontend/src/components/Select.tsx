@@ -6,15 +6,22 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label: string;
   error?: string;
   options: { value: string; label: string }[];
+  hideLabel?: boolean;
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, error, options, className, id, ...props }, ref) => {
+  ({ label, error, options, className, id, hideLabel, ...props }, ref) => {
     const generatedId = useId();
     const selectId = id ?? generatedId;
     return (
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor={selectId} className="text-sm font-medium text-sand-700 dark:text-sand-300">
+      <div className={clsx("flex flex-col", !hideLabel && "gap-1.5")}>
+        <label
+          htmlFor={selectId}
+          className={clsx(
+            "text-sm font-medium text-sand-700 dark:text-sand-300",
+            hideLabel && "sr-only",
+          )}
+        >
           {label}
         </label>
         <div className="relative">

@@ -1,4 +1,5 @@
 import { logAuditEntry } from "./audit";
+import { currentActorOffice } from "../lib/actor";
 
 export type CooperativeAccountPurpose = "DEPOSITS" | "LOAN_REPAYMENTS" | "COMMODITY_REPAYMENTS";
 
@@ -18,7 +19,7 @@ export const cooperativeAccounts: MockCooperativeAccount[] = [
     label: "Deposits",
     bank_name: "First Bank of Nigeria",
     account_name: "NDU Cooperative Society",
-    account_number: "2034567891",
+    account_number: "0000000000",
   },
   {
     id: 2,
@@ -26,7 +27,7 @@ export const cooperativeAccounts: MockCooperativeAccount[] = [
     label: "Loan repayments",
     bank_name: "GTBank",
     account_name: "NDU Cooperative Society — Loans",
-    account_number: "0123456789",
+    account_number: "0000000000",
   },
   {
     id: 3,
@@ -34,7 +35,7 @@ export const cooperativeAccounts: MockCooperativeAccount[] = [
     label: "Commodity repayments",
     bank_name: "Zenith Bank",
     account_name: "NDU Cooperative Society — Commodities",
-    account_number: "1029384756",
+    account_number: "0000000000",
   },
 ];
 
@@ -55,7 +56,7 @@ export function updateCooperativeAccount(
   };
   Object.assign(acct, updates);
   logAuditEntry({
-    actorName: "Current admin",
+    actorName: currentActorOffice(),
     actorRole: "Full admin",
     action: "SYSTEM_SETTING_CHANGED",
     targetMemberId: null,

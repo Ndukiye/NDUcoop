@@ -25,6 +25,7 @@ interface ApprovalQueueTableProps<T extends ApprovableRow> {
   isDeciding?: boolean;
   emptyState?: { title: string; description: string };
   renderDetails?: (row: T) => ReactNode;
+  toolbar?: ReactNode;
 }
 
 export function ApprovalQueueTable<T extends ApprovableRow>({
@@ -38,6 +39,7 @@ export function ApprovalQueueTable<T extends ApprovableRow>({
   isDeciding,
   emptyState,
   renderDetails,
+  toolbar,
 }: ApprovalQueueTableProps<T>) {
   const [pending, setPending] = useState<{ row: T; mode: "APPROVE" | "REJECT" | "VIEW" } | null>(
     null,
@@ -46,7 +48,12 @@ export function ApprovalQueueTable<T extends ApprovableRow>({
 
   const allColumns: Column<T>[] = [
     ...columns,
-    { key: "status", header: "Status", render: (row) => <StatusBadge status={row.status} /> },
+    {
+      key: "status",
+      header: "Status",
+      render: (row) => <StatusBadge status={row.status} />,
+      sortAccessor: (row) => row.status,
+    },
     {
       key: "actions",
       header: "",
@@ -92,6 +99,7 @@ export function ApprovalQueueTable<T extends ApprovableRow>({
         rowKey={(r) => r.id}
         isLoading={isLoading}
         emptyState={emptyState}
+        toolbar={toolbar}
       />
 
       <Modal

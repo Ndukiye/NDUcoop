@@ -1,4 +1,5 @@
 import type { ApprovalStatus } from "../lib/types";
+import { currentActorOffice } from "../lib/actor";
 import { logAuditEntry } from "./audit";
 
 export type CommodityApplicationStatus = ApprovalStatus | "COMPLETED";
@@ -32,37 +33,30 @@ export const commodityTypes: MockCommodityType[] = [
     default_max_duration_months: 6,
     is_active: true,
   },
-  {
-    id: 2,
-    name: "Vegetable Oil",
-    unit: "25L keg",
-    cost_price: "38000.00",
-    selling_price: "43500.00",
-    current_stock_quantity: 60,
-    default_max_duration_months: 6,
-    is_active: true,
-  },
-  {
-    id: 3,
-    name: "Beans",
-    unit: "50kg bag",
-    cost_price: "40000.00",
-    selling_price: "46000.00",
-    current_stock_quantity: 8,
-    default_max_duration_months: 6,
-    is_active: true,
-  },
-  {
-    id: 4,
-    name: "Sugar",
-    unit: "50kg bag",
-    cost_price: "30000.00",
-    selling_price: "35000.00",
-    current_stock_quantity: 0,
-    default_max_duration_months: 6,
-    is_active: true,
-  },
 ];
+
+let nextTypeId = 2;
+
+export function addCommodityType(input: {
+  name: string;
+  unit: string;
+  cost_price: string;
+  selling_price: string;
+  current_stock_quantity: number;
+  default_max_duration_months: number;
+}): MockCommodityType {
+  const type: MockCommodityType = { id: nextTypeId++, is_active: true, ...input };
+  commodityTypes.push(type);
+  logAuditEntry({
+    actorName: currentActorOffice(),
+    actorRole: "Full admin",
+    action: "SYSTEM_SETTING_CHANGED",
+    previousValue: null,
+    newValue: { commodity: type.name, selling_price: type.selling_price, stock: type.current_stock_quantity },
+    reason: "New commodity added to catalog",
+  });
+  return type;
+}
 
 export interface MockCommodityApplication {
   id: number;
@@ -123,21 +117,19 @@ function makeApplication(
 
 export const commodityApplications: MockCommodityApplication[] = [
   makeApplication(1, 1, 2, 6, "PENDING", 1, null, null),
-  makeApplication(2, 2, 1, 4, "PENDING", 2, null, null),
-  makeApplication(3, 1, 1, 6, "APPROVED", 20, "Amaka Okafor", null),
-  makeApplication(4, 3, 3, 6, "APPROVED", 35, "Tunde Bakare", null),
-  makeApplication(1, 4, 2, 3, "REJECTED", 15, "Amaka Okafor", "Item currently out of stock"),
-  makeApplication(6, 2, 2, 6, "PENDING", 0.5, null, null),
+  makeApplication(3, 1, 1, 6, "APPROVED", 20, "President", null),
+  makeApplication(4, 1, 3, 6, "APPROVED", 35, "Treasurer", null),
+  makeApplication(6, 1, 2, 6, "PENDING", 0.5, null, null),
 ];
 
 // Give one approved application a bit of repayment history for a realistic demo.
-const sampleRepaid = commodityApplications.find((a) => a.id === 3);
+const sampleRepaid = commodityApplications.find((a) => a.id === 2);
 if (sampleRepaid) {
   const paid = Number(sampleRepaid.monthly_repayment) * 2;
   sampleRepaid.outstanding_balance = (Number(sampleRepaid.total_amount) - paid).toFixed(2);
   sampleRepaid.repayments = [
-    { id: "seed-3-1", amount: sampleRepaid.monthly_repayment, paid_at: iso(10), is_manual: false },
-    { id: "seed-3-2", amount: sampleRepaid.monthly_repayment, paid_at: iso(5), is_manual: true },
+    { id: "seed-2-1", amount: sampleRepaid.monthly_repayment, paid_at: iso(10), is_manual: false },
+    { id: "seed-2-2", amount: sampleRepaid.monthly_repayment, paid_at: iso(5), is_manual: true },
   ];
 }
 

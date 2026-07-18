@@ -89,11 +89,11 @@ function buildLoan(
 }
 
 export const loans: MockLoan[] = [
-  buildLoan(1, 1, 100000, "ACTIVE", 200, "Amaka Okafor", 4),
+  buildLoan(1, 1, 100000, "ACTIVE", 200, "President", 4),
   buildLoan(2, 2, 250000, "PENDING_ADMIN_APPROVAL", 5, null, 0),
-  buildLoan(3, 1, 60000, "COMPLETED", 400, "Tunde Bakare", 6),
+  buildLoan(3, 1, 60000, "COMPLETED", 400, "Treasurer", 6),
   buildLoan(4, 3, 500000, "PENDING_GUARANTORS", 2, null, 0),
-  buildLoan(6, 1, 80000, "REJECTED", 60, "Amaka Okafor", 0),
+  buildLoan(6, 1, 80000, "REJECTED", 60, "President", 0),
 ];
 
 export function findLoan(id: number): MockLoan | undefined {
@@ -155,6 +155,39 @@ export function applyManualLoanRepayment(loanId: number, amount: number): MockLo
   if (newOutstanding <= 0) {
     loan.status = "COMPLETED";
   }
+  return loan;
+}
+
+/**
+ * Proposal §12: if a monthly salary deduction fails or is wrong, an admin can
+ * reverse the repayment record — the amount is added back to the outstanding
+ * balance and the reversal is audit-logged with a reason.
+ */
+export function reverseLoanRepayment(
+  loanId: number,
+  repaymentId: string,
+  reason: string,
+  reversedBy: string,
+): MockLoan | undefined {
+  const loan = findLoan(loanId);
+  if (!loan) return undefined;
+  const idx = loan.repayments.findIndex((r) => r.id === repaymentId);
+  if (idx === -1) return undefined;
+  const [removed] = loan.repayments.splice(idx, 1);
+  const previousOutstanding = loan.outstanding_balance;
+  loan.outstanding_balance = (Number(loan.outstanding_balance) + Number(removed.amount)).toFixed(2);
+  if (loan.status === "COMPLETED" && Number(loan.outstanding_balance) > 0) {
+    loan.status = "ACTIVE";
+  }
+  logAuditEntry({
+    actorName: reversedBy,
+    actorRole: "Full admin",
+    action: "LOAN_REPAYMENT_REVERSED",
+    targetMemberId: loan.member_id,
+    previousValue: { outstanding_balance: previousOutstanding, repayment_amount: removed.amount },
+    newValue: { outstanding_balance: loan.outstanding_balance },
+    reason,
+  });
   return loan;
 }
 

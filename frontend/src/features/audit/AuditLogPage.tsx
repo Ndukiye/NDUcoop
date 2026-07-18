@@ -71,32 +71,6 @@ export function AuditLogPage() {
             Every admin action on member money, with before/after detail.
           </p>
         </div>
-        <div className="flex flex-wrap gap-3">
-          <TextField
-            label="Search"
-            placeholder="Actor, target member, or reason"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            className="sm:w-64"
-          />
-          <div className="w-56">
-            <Select
-              label="Action"
-              options={[
-                { value: "", label: "All actions" },
-                ...auditActions.map((a) => ({ value: a, label: actionLabels[a] ?? a })),
-              ]}
-              value={action}
-              onChange={(e) => {
-                setAction(e.target.value);
-                setPage(1);
-              }}
-            />
-          </div>
-        </div>
       </div>
 
       <DataTable
@@ -105,12 +79,42 @@ export function AuditLogPage() {
         rowKey={(e) => e.id}
         isLoading={isLoading}
         onRowClick={(e) => setViewing(e)}
+        toolbar={
+          <>
+            <TextField
+              label="Search"
+              hideLabel
+              placeholder="Search actor, target member, or reason"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              className="w-full sm:w-72"
+            />
+            <div className="w-full sm:w-56">
+              <Select
+                label="Action"
+                hideLabel
+                options={[
+                  { value: "", label: "All actions" },
+                  ...auditActions.map((a) => ({ value: a, label: actionLabels[a] ?? a })),
+                ]}
+                value={action}
+                onChange={(e) => {
+                  setAction(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </div>
+          </>
+        }
+        footer={<Pagination page={page} pageCount={pageCount} onPageChange={setPage} />}
         emptyState={{
           title: "No audit entries",
           description: "There are no audit log entries matching this filter.",
         }}
       />
-      <Pagination page={page} pageCount={pageCount} onPageChange={setPage} />
 
       <Modal open={!!viewing} onClose={() => setViewing(null)} title="Audit entry detail" size="lg">
         {viewing && (

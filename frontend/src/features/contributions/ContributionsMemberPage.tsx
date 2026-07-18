@@ -94,14 +94,6 @@ export function ContributionsMemberPage() {
         />
       </div>
 
-      <TextField
-        label="Search"
-        placeholder="e.g. January 2026"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="sm:w-64"
-      />
-
       <DataTable
         columns={columns}
         rows={rows}
@@ -109,6 +101,16 @@ export function ContributionsMemberPage() {
         isLoading={isLoading}
         defaultSort={{ key: "month", dir: "desc" }}
         pageSize={12}
+        toolbar={
+          <TextField
+            label="Search"
+            hideLabel
+            placeholder="Search month, e.g. January 2026"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full sm:w-72"
+          />
+        }
         emptyState={{
           title: "No contributions yet",
           description: "Your monthly contribution history will appear here once posted.",

@@ -22,6 +22,10 @@ interface DataTableProps<T> {
   onRowClick?: (row: T) => void;
   defaultSort?: { key: string; dir: "asc" | "desc" };
   pageSize?: number;
+  /** Filters/search rendered inside the card, above the table. */
+  toolbar?: ReactNode;
+  /** Custom footer (e.g. server-driven Pagination) rendered inside the card. */
+  footer?: ReactNode;
 }
 
 export function DataTable<T>({
@@ -34,6 +38,8 @@ export function DataTable<T>({
   onRowClick,
   defaultSort,
   pageSize,
+  toolbar,
+  footer,
 }: DataTableProps<T>) {
   const [sort, setSort] = useState<{ key: string; dir: "asc" | "desc" } | null>(
     defaultSort ?? null,
@@ -70,7 +76,9 @@ export function DataTable<T>({
     });
   }
 
-  if (!isLoading && rows.length === 0) {
+  const isEmpty = !isLoading && rows.length === 0;
+
+  if (isEmpty && !toolbar) {
     return (
       <EmptyState
         title={emptyState?.title ?? "Nothing here yet"}
@@ -80,90 +88,113 @@ export function DataTable<T>({
   }
 
   return (
-    <>
     <div className="relative overflow-hidden rounded-2xl border border-sand-200 bg-white shadow-soft dark:border-sand-800 dark:bg-sand-900">
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-left text-sm">
-          <thead>
-            <tr className="border-b border-sand-200 bg-sand-50 dark:border-sand-800 dark:bg-sand-800/40">
-              {columns.map((col) => (
-                <th
-                  key={col.key}
-                  className={clsx(
-                    "whitespace-nowrap px-4 py-3 text-xs font-semibold uppercase tracking-wide text-sand-500 dark:text-sand-400",
-                    col.className,
-                  )}
-                >
-                  {col.sortAccessor ? (
-                    <button
-                      type="button"
-                      onClick={() => toggleSort(col.key)}
-                      className="flex items-center gap-1 hover:text-sand-800 dark:hover:text-sand-100"
-                    >
-                      {col.header}
-                      <Icon
-                        name="chevron-down"
-                        className={clsx(
-                          "h-3.5 w-3.5 transition-transform",
-                          sort?.key === col.key
-                            ? sort.dir === "asc"
-                              ? "rotate-180 text-sand-700 dark:text-sand-200"
-                              : "text-sand-700 dark:text-sand-200"
-                            : "opacity-30",
-                        )}
-                      />
-                    </button>
-                  ) : (
-                    col.header
-                  )}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-sand-100 dark:divide-sand-800">
-            {isLoading
-              ? Array.from({ length: skeletonRows }).map((_, i) => (
-                  <tr key={i}>
-                    {columns.map((col) => (
-                      <td key={col.key} className="px-4 py-3.5">
-                        <div className="h-3.5 w-full max-w-[10rem] animate-pulse rounded bg-sand-100 dark:bg-sand-800" />
-                      </td>
-                    ))}
-                  </tr>
-                ))
-              : visibleRows.map((row) => (
-                  <tr
-                    key={rowKey(row)}
-                    onClick={onRowClick ? () => onRowClick(row) : undefined}
+      {toolbar && (
+        <div className="flex flex-wrap items-center gap-2.5 border-b border-sand-200 bg-sand-50/60 px-3 py-2.5 dark:border-sand-800 dark:bg-sand-800/30 sm:px-4">
+          {toolbar}
+        </div>
+      )}
+      {isEmpty ? (
+        <div className="flex flex-col items-center gap-2 px-6 py-12 text-center">
+          <div className="mb-1 h-10 w-10 rounded-full border-2 border-dashed border-sand-300 dark:border-sand-700" />
+          <p className="font-display text-base font-medium text-sand-800 dark:text-sand-100">
+            {emptyState?.title ?? "Nothing here yet"}
+          </p>
+          <p className="max-w-sm text-sm text-sand-500 dark:text-sand-400">
+            {emptyState?.description ?? "There's no data to show yet."}
+          </p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse text-left text-sm">
+            <thead>
+              <tr className="border-b border-sand-200 bg-sand-50 dark:border-sand-800 dark:bg-sand-800/40">
+                {columns.map((col) => (
+                  <th
+                    key={col.key}
                     className={clsx(
-                      "transition-colors",
-                      onRowClick && "cursor-pointer hover:bg-sand-50 dark:hover:bg-sand-800/60",
+                      "whitespace-nowrap px-4 py-3 text-xs font-semibold uppercase tracking-wide text-sand-500 dark:text-sand-400",
+                      col.className,
                     )}
                   >
-                    {columns.map((col) => (
-                      <td
-                        key={col.key}
-                        className={clsx(
-                          "px-4 py-3.5 text-sand-800 dark:text-sand-100",
-                          col.className,
-                        )}
+                    {col.sortAccessor ? (
+                      <button
+                        type="button"
+                        onClick={() => toggleSort(col.key)}
+                        className="inline-flex items-center gap-1 align-middle hover:text-sand-800 dark:hover:text-sand-100"
                       >
-                        {col.render(row)}
-                      </td>
-                    ))}
-                  </tr>
+                        {col.header}
+                        <Icon
+                          name="chevron-down"
+                          className={clsx(
+                            "h-3.5 w-3.5 transition-transform",
+                            sort?.key === col.key
+                              ? sort.dir === "asc"
+                                ? "rotate-180 text-sand-700 dark:text-sand-200"
+                                : "text-sand-700 dark:text-sand-200"
+                              : "opacity-30",
+                          )}
+                        />
+                      </button>
+                    ) : (
+                      col.header
+                    )}
+                  </th>
                 ))}
-          </tbody>
-        </table>
-      </div>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-sand-100 dark:divide-sand-800">
+              {isLoading
+                ? Array.from({ length: skeletonRows }).map((_, i) => (
+                    <tr key={i}>
+                      {columns.map((col) => (
+                        <td key={col.key} className="px-4 py-3.5">
+                          <div className="h-3.5 w-full max-w-[10rem] animate-pulse rounded bg-sand-100 dark:bg-sand-800" />
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                : visibleRows.map((row) => (
+                    <tr
+                      key={rowKey(row)}
+                      onClick={onRowClick ? () => onRowClick(row) : undefined}
+                      className={clsx(
+                        "transition-colors",
+                        onRowClick && "cursor-pointer hover:bg-sand-50 dark:hover:bg-sand-800/60",
+                      )}
+                    >
+                      {columns.map((col) => (
+                        <td
+                          key={col.key}
+                          className={clsx(
+                            "px-4 py-3.5 text-sand-800 dark:text-sand-100",
+                            col.className,
+                          )}
+                        >
+                          {col.render(row)}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {footer ? (
+        <div className="border-t border-sand-200 px-3 dark:border-sand-800">{footer}</div>
+      ) : (
+        pageSize &&
+        !isLoading &&
+        pageCount > 1 && (
+          <div className="border-t border-sand-200 px-3 dark:border-sand-800">
+            <Pagination page={currentPage} pageCount={pageCount} onPageChange={setPage} />
+          </div>
+        )
+      )}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white to-transparent dark:!from-sand-900 sm:hidden"
       />
     </div>
-    {pageSize && !isLoading && (
-      <Pagination page={currentPage} pageCount={pageCount} onPageChange={setPage} />
-    )}
-    </>
   );
 }

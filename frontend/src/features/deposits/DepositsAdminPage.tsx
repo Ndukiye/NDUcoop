@@ -81,29 +81,33 @@ export function DepositsAdminPage() {
             Review and decide on member deposit requests.
           </p>
         </div>
-        <div className="flex flex-wrap gap-3">
-          <TextField
-            label="Search"
-            placeholder="Member name"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="sm:w-56"
-          />
-          <div className="w-48">
-            <Select
-              label="Status"
-              options={statusOptions}
-              value={status}
-              onChange={(e) => setStatus(e.target.value as ApprovalStatus | "")}
-            />
-          </div>
-        </div>
       </div>
 
       <ApprovalQueueTable
         rows={rows}
         isLoading={isLoading}
         columns={columns}
+        toolbar={
+          <>
+            <TextField
+              label="Search"
+              hideLabel
+              placeholder="Search member name"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full sm:w-72"
+            />
+            <div className="w-full sm:w-48">
+              <Select
+                label="Status"
+                hideLabel
+                options={statusOptions}
+                value={status}
+                onChange={(e) => setStatus(e.target.value as ApprovalStatus | "")}
+              />
+            </div>
+          </>
+        }
         canDecide={isFullAdmin(role)}
         isDeciding={decideMutation.isPending}
         onApprove={(row, note) =>

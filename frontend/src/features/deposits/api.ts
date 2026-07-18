@@ -1,4 +1,5 @@
 import type { Paginated, ApprovalStatus } from "../../lib/types";
+import { currentActorOffice } from "../../lib/actor";
 import { delay } from "../../mocks/delay";
 import {
   depositRequests,
@@ -58,6 +59,6 @@ export async function decideDeposit(
   decision: "APPROVE" | "REJECT",
   note: string,
 ): Promise<DepositRequest | null> {
-  const req = decideDepositRequest(id, decision, note, "Current admin");
+  const req = decideDepositRequest(id, decision, note, currentActorOffice());
   return delay(req ? withMemberName(req) : null);
 }

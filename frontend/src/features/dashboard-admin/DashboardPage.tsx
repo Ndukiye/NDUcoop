@@ -6,8 +6,9 @@ import { EmptyState } from "../../components/EmptyState";
 import { StatusBadge } from "../../components/StatusBadge";
 import { Icon } from "../../components/Icon";
 import { useAuthStore } from "../../store/auth";
-import { isFullAdmin } from "../../lib/roles";
+import { isFullAdmin, roleLabel } from "../../lib/roles";
 import { formatNaira, formatDateTime } from "../../lib/format";
+import { useBalanceVisibility, MASKED_VALUE } from "../../lib/useBalanceVisibility";
 import {
   fetchMemberCount,
   fetchDashboardOverview,
@@ -53,6 +54,8 @@ const pendingQueues = [
 export function AdminDashboardPage() {
   const user = useAuthStore((s) => s.user);
   const navigate = useNavigate();
+  const [hidden, setHidden] = useBalanceVisibility();
+  const mask = (value: string | number) => (hidden ? MASKED_VALUE : formatNaira(value));
   const { data: memberCount } = useQuery({
     queryKey: ["members", "count"],
     queryFn: fetchMemberCount,
@@ -77,13 +80,28 @@ export function AdminDashboardPage() {
               "radial-gradient(circle at 12% 15%, var(--color-gold-300) 0, transparent 38%), radial-gradient(circle at 90% 85%, var(--color-pine-300) 0, transparent 42%)",
           }}
         />
-        <div className="relative flex flex-wrap items-center gap-3">
-          <h2 className="font-display text-2xl font-medium text-pine-50">Cooperative overview</h2>
-          {!isFullAdmin(user?.role) && (
-            <span className="inline-flex items-center rounded-full border border-pine-200/30 bg-white/10 px-2.5 py-0.5 text-xs font-medium text-pine-100">
-              Read-only access
-            </span>
-          )}
+        <div className="relative flex flex-wrap items-start justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <div>
+              <h2 className="font-display text-2xl font-medium text-pine-50">
+                Welcome, {roleLabel(user?.role)}
+              </h2>
+              <p className="mt-1 text-sm text-pine-200">Cooperative overview</p>
+            </div>
+            {!isFullAdmin(user?.role) && (
+              <span className="inline-flex items-center rounded-full border border-pine-200/30 bg-white/10 px-2.5 py-0.5 text-xs font-medium text-pine-100">
+                Read-only access
+              </span>
+            )}
+          </div>
+          <button
+            onClick={() => setHidden((h) => !h)}
+            className="flex shrink-0 items-center gap-1.5 rounded-lg border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-medium text-pine-100 backdrop-blur-sm transition-colors hover:bg-white/15"
+            aria-label={hidden ? "Show balances" : "Hide balances"}
+          >
+            <Icon name={hidden ? "eye-off" : "eye"} className="h-4 w-4" />
+            <span className="hidden sm:inline">{hidden ? "Show balances" : "Hide balances"}</span>
+          </button>
         </div>
       </div>
 
@@ -120,10 +138,10 @@ export function AdminDashboardPage() {
 
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <StatCard label="Total members" value={memberCount?.toLocaleString() ?? "—"} tone="accent" />
-        <StatCard label="Total assets" value={overview ? formatNaira(overview.totalAssets) : "—"} />
+        <StatCard label="Total assets" value={overview ? mask(overview.totalAssets) : "—"} />
         <StatCard label="Active loans" value={overview ? String(overview.activeLoans) : "—"} />
         <StatCard
-          label="Active commodity plans"
+          label="Active commodity repayments"
           value={overview ? String(overview.activeCommodityPlans) : "—"}
         />
       </div>
@@ -133,13 +151,13 @@ export function AdminDashboardPage() {
           Balances breakdown
         </p>
         <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
-          <StatCard label="Total shares" value={overview ? formatNaira(overview.totalShares) : "—"} />
-          <StatCard label="Total welfare" value={overview ? formatNaira(overview.totalWelfare) : "—"} />
+          <StatCard label="Total shares" value={overview ? mask(overview.totalShares) : "—"} />
+          <StatCard label="Total welfare" value={overview ? mask(overview.totalWelfare) : "—"} />
           <StatCard
             label="Total compulsory savings"
-            value={overview ? formatNaira(overview.totalCompulsorySavings) : "—"}
+            value={overview ? mask(overview.totalCompulsorySavings) : "—"}
           />
-          <StatCard label="Total deposits" value={overview ? formatNaira(overview.totalDeposits) : "—"} />
+          <StatCard label="Total deposits" value={overview ? mask(overview.totalDeposits) : "—"} />
           <StatCard
             label="Completed loans"
             value={overview ? String(overview.completedLoans) : "—"}
@@ -175,7 +193,7 @@ export function AdminDashboardPage() {
 
       <div>
         <p className="mb-3 text-sm font-medium text-sand-500 dark:text-sand-400">
-          Recent approvals
+          Recent transactions & approvals
         </p>
         {activityLoading ? (
           <div className="h-40 animate-pulse rounded-2xl bg-sand-100 dark:bg-sand-800" />
@@ -198,7 +216,7 @@ export function AdminDashboardPage() {
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-1">
                     <span className="text-sm font-medium text-sand-800 dark:text-sand-100">
-                      {formatNaira(item.amount)}
+                      {mask(item.amount)}
                     </span>
                     <StatusBadge status={item.status} />
                   </div>

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card } from "../../components/Card";
 import { ProgressBar } from "../../components/ProgressBar";
@@ -27,6 +28,7 @@ export function LoanApprovalQueuePage() {
   const toast = useToast();
   const queryClient = useQueryClient();
   const role = useAuthStore((s) => s.user?.role);
+  const navigate = useNavigate();
 
   const { data: pending, isLoading } = useQuery({
     queryKey: ["loans", "admin", "PENDING_ADMIN_APPROVAL"],
@@ -120,20 +122,23 @@ export function LoanApprovalQueuePage() {
       </div>
 
       <div>
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm font-medium text-sand-500 dark:text-sand-400">Pending approval</p>
-          <TextField
-            label="Search"
-            placeholder="Member name"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="sm:w-56"
-          />
-        </div>
+        <p className="mb-3 text-sm font-medium text-sand-500 dark:text-sand-400">
+          Pending approval
+        </p>
         <ApprovalQueueTable
           rows={pendingRows}
           isLoading={isLoading}
           columns={columns}
+          toolbar={
+            <TextField
+              label="Search"
+              hideLabel
+              placeholder="Search member name"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full sm:w-72"
+            />
+          }
           canDecide
           decidableStatus="PENDING_ADMIN_APPROVAL"
           isDeciding={decideMutation.isPending}
@@ -169,21 +174,22 @@ export function LoanApprovalQueuePage() {
       </div>
 
       <div>
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm font-medium text-sand-500 dark:text-sand-400">
-            Repayment requests
-          </p>
-          <TextField
-            label="Search"
-            placeholder="Member name"
-            value={repaymentSearch}
-            onChange={(e) => setRepaymentSearch(e.target.value)}
-            className="sm:w-56"
-          />
-        </div>
+        <p className="mb-3 text-sm font-medium text-sand-500 dark:text-sand-400">
+          Repayment requests
+        </p>
         <RepaymentRequestsQueue
           rows={repaymentRows}
           isLoading={repaymentRequestsLoading}
+          toolbar={
+            <TextField
+              label="Search"
+              hideLabel
+              placeholder="Search member name"
+              value={repaymentSearch}
+              onChange={(e) => setRepaymentSearch(e.target.value)}
+              className="w-full sm:w-72"
+            />
+          }
           canDecide={isFullAdmin(role)}
           isDeciding={decideRepaymentMutation.isPending}
           onApprove={(row, note) =>
@@ -201,7 +207,11 @@ export function LoanApprovalQueuePage() {
           {active?.results.map((loan) => {
             const paid = Number(loan.principal_granted) - Number(loan.outstanding_balance);
             return (
-              <Card key={loan.id} className="flex flex-col gap-3 p-5">
+              <Card
+                key={loan.id}
+                onClick={() => navigate(`/loans/${loan.id}`)}
+                className="flex cursor-pointer flex-col gap-3 p-5 transition-colors hover:bg-sand-50 dark:hover:bg-sand-800/60"
+              >
                 <div className="flex items-center justify-between">
                   <p className="font-medium text-sand-900 dark:text-sand-50">{loan.member_name}</p>
                   <StatusBadge status={loan.status} />

@@ -46,7 +46,7 @@ export const repaymentRequests: MockRepaymentRequest[] = [
   {
     id: nextId++,
     target_type: "COMMODITY",
-    target_id: 3,
+    target_id: 2,
     member_id: 3,
     amount: "7666.67",
     receipt_filename: "commodity-repayment-receipt.jpg",
@@ -68,7 +68,7 @@ export const repaymentRequests: MockRepaymentRequest[] = [
     status: "APPROVED",
     submitted_at: iso(20),
     decided_at: iso(19),
-    decided_by: "Amaka Okafor",
+    decided_by: "President",
     decision_note: null,
   },
 ];

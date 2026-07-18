@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { Column } from "../../components/Table";
 import { ApprovalQueueTable } from "./ApprovalQueueTable";
 import { ReceiptButton } from "./ReceiptButton";
@@ -23,6 +24,7 @@ export function RepaymentRequestsQueue({
   isDeciding,
   onApprove,
   onReject,
+  toolbar,
 }: {
   rows: EnrichedRepaymentRequest[];
   isLoading: boolean;
@@ -30,6 +32,7 @@ export function RepaymentRequestsQueue({
   isDeciding: boolean;
   onApprove: (row: EnrichedRepaymentRequest, note: string) => unknown;
   onReject: (row: EnrichedRepaymentRequest, note: string) => unknown;
+  toolbar?: ReactNode;
 }) {
   const columns: Column<EnrichedRepaymentRequest>[] = [
     { key: "member", header: "Member", render: (r) => r.member_name, sortAccessor: (r) => r.member_name },
@@ -64,6 +67,7 @@ export function RepaymentRequestsQueue({
       isDeciding={isDeciding}
       onApprove={onApprove}
       onReject={onReject}
+      toolbar={toolbar}
       renderDetails={(row) => (
         <>
           <div>

@@ -34,7 +34,9 @@ export function WithdrawalsAdminPage() {
     const results = data?.results ?? [];
     if (!search.trim()) return results;
     const q = search.toLowerCase();
-    return results.filter((r) => r.member_name.toLowerCase().includes(q));
+    return results.filter(
+      (r) => r.member_name.toLowerCase().includes(q) || r.payout_account_number.includes(q),
+    );
   }, [data, search]);
 
   const decideMutation = useMutation({
@@ -80,29 +82,33 @@ export function WithdrawalsAdminPage() {
             Review and decide on member withdrawal requests.
           </p>
         </div>
-        <div className="flex flex-wrap gap-3">
-          <TextField
-            label="Search"
-            placeholder="Member name"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="sm:w-56"
-          />
-          <div className="w-48">
-            <Select
-              label="Status"
-              options={statusOptions}
-              value={status}
-              onChange={(e) => setStatus(e.target.value as ApprovalStatus | "")}
-            />
-          </div>
-        </div>
       </div>
 
       <ApprovalQueueTable
         rows={rows}
         isLoading={isLoading}
         columns={columns}
+        toolbar={
+          <>
+            <TextField
+              label="Search"
+              hideLabel
+              placeholder="Search member or account number"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full sm:w-72"
+            />
+            <div className="w-full sm:w-48">
+              <Select
+                label="Status"
+                hideLabel
+                options={statusOptions}
+                value={status}
+                onChange={(e) => setStatus(e.target.value as ApprovalStatus | "")}
+              />
+            </div>
+          </>
+        }
         canDecide={isFullAdmin(role)}
         isDeciding={decideMutation.isPending}
         onApprove={(row, note) =>

@@ -1,4 +1,5 @@
 import type { Paginated, ApprovalStatus } from "../../lib/types";
+import { currentActorOffice } from "../../lib/actor";
 import { delay } from "../../mocks/delay";
 import {
   withdrawalRequests,
@@ -68,6 +69,6 @@ export async function decideWithdrawal(
   decision: "APPROVE" | "REJECT",
   note: string,
 ): Promise<WithdrawalRequest | null> {
-  const req = decideWithdrawalRequest(id, decision, note, "Current admin");
+  const req = decideWithdrawalRequest(id, decision, note, currentActorOffice());
   return delay(req ? withMemberName(req) : null);
 }

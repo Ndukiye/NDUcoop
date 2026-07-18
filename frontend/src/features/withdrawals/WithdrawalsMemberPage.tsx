@@ -23,7 +23,11 @@ export function WithdrawalsMemberPage() {
     if (!search.trim()) return results;
     const q = search.toLowerCase();
     return results.filter(
-      (r) => r.status.toLowerCase().includes(q) || String(r.amount).includes(q),
+      (r) =>
+        r.status.toLowerCase().includes(q) ||
+        String(r.amount).includes(q) ||
+        r.payout_account_number.includes(q) ||
+        r.payout_bank_name.toLowerCase().includes(q),
     );
   }, [data, search]);
 
@@ -48,7 +52,12 @@ export function WithdrawalsMemberPage() {
       render: (r) => `${r.payout_bank_name} · ${r.payout_account_number}`,
       className: "hidden md:table-cell",
     },
-    { key: "status", header: "Status", render: (r) => <StatusBadge status={r.status} /> },
+    {
+      key: "status",
+      header: "Status",
+      render: (r) => <StatusBadge status={r.status} />,
+      sortAccessor: (r) => r.status,
+    },
     { key: "note", header: "Decision note", render: (r) => r.decision_note ?? "—", className: "hidden md:table-cell" },
     {
       key: "receipt",
@@ -70,14 +79,6 @@ export function WithdrawalsMemberPage() {
         </Button>
       </div>
 
-      <TextField
-        label="Search"
-        placeholder="Status or amount"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="sm:w-64"
-      />
-
       <DataTable
         columns={columns}
         rows={rows}
@@ -85,6 +86,16 @@ export function WithdrawalsMemberPage() {
         isLoading={isLoading}
         defaultSort={{ key: "date", dir: "desc" }}
         pageSize={10}
+        toolbar={
+          <TextField
+            label="Search"
+            hideLabel
+            placeholder="Search status, amount, or account"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full sm:w-72"
+          />
+        }
         emptyState={{
           title: "No withdrawals yet",
           description: "Withdrawals you apply for will show up here.",

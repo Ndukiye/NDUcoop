@@ -17,7 +17,13 @@ import { useToast } from "../../components/Toast";
 import { formatNaira, formatDate } from "../../lib/format";
 import { useAuthStore } from "../../store/auth";
 import { isFullAdmin } from "../../lib/roles";
-import { fetchMember, fetchMemberLedger, setMemberStatus, editMember } from "./api";
+import {
+  fetchMember,
+  fetchMemberLedger,
+  setMemberStatus,
+  editMember,
+  terminateMemberAccount,
+} from "./api";
 import type { MockLedgerEntry } from "../../mocks/ledger";
 
 const categoryLabels: Record<string, string> = {
@@ -41,6 +47,8 @@ export function MemberDetailPage() {
   const queryClient = useQueryClient();
   const [suspendOpen, setSuspendOpen] = useState(false);
   const [suspendReason, setSuspendReason] = useState("");
+  const [terminateOpen, setTerminateOpen] = useState(false);
+  const [terminateReason, setTerminateReason] = useState("");
   const [editOpen, setEditOpen] = useState(false);
   const [ledgerSearch, setLedgerSearch] = useState("");
 
@@ -61,6 +69,20 @@ export function MemberDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["members"] });
       setSuspendOpen(false);
       setSuspendReason("");
+    },
+  });
+
+  const terminateMutation = useMutation({
+    mutationFn: () => terminateMemberAccount(memberId, terminateReason),
+    onSuccess: () => {
+      toast.show({
+        tone: "success",
+        title: "Membership terminated",
+        description: "Balances cleared and recorded in the audit trail.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["members"] });
+      setTerminateOpen(false);
+      setTerminateReason("");
     },
   });
 
@@ -181,6 +203,11 @@ export function MemberDetailPage() {
                 Suspend
               </Button>
             )}
+            {member.status !== "TERMINATED" && (
+              <Button variant="danger" onClick={() => setTerminateOpen(true)}>
+                Terminate
+              </Button>
+            )}
           </div>
         )}
       </div>
@@ -231,16 +258,7 @@ export function MemberDetailPage() {
       </Card>
 
       <div>
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm font-medium text-sand-500 dark:text-sand-400">Ledger history</p>
-          <TextField
-            label="Search"
-            placeholder="Category or description"
-            value={ledgerSearch}
-            onChange={(e) => setLedgerSearch(e.target.value)}
-            className="sm:w-64"
-          />
-        </div>
+        <p className="mb-3 text-sm font-medium text-sand-500 dark:text-sand-400">Ledger history</p>
         <DataTable
           columns={columns}
           rows={ledgerRows}
@@ -248,6 +266,16 @@ export function MemberDetailPage() {
           isLoading={ledgerLoading}
           defaultSort={{ key: "date", dir: "desc" }}
           pageSize={10}
+          toolbar={
+            <TextField
+              label="Search"
+              hideLabel
+              placeholder="Search category or description"
+              value={ledgerSearch}
+              onChange={(e) => setLedgerSearch(e.target.value)}
+              className="w-full sm:w-72"
+            />
+          }
           emptyState={{
             title: "No ledger activity yet",
             description: "Contributions, deposits, and other transactions will appear here.",
@@ -286,6 +314,44 @@ export function MemberDetailPage() {
             placeholder="Why this member is being suspended"
             value={suspendReason}
             onChange={(e) => setSuspendReason(e.target.value)}
+          />
+        </div>
+      </Modal>
+
+      <Modal
+        open={terminateOpen}
+        onClose={() => setTerminateOpen(false)}
+        title="Terminate membership"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setTerminateOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              disabled={!terminateReason.trim()}
+              loading={terminateMutation.isPending}
+              onClick={() => terminateMutation.mutate()}
+            >
+              Confirm termination
+            </Button>
+          </>
+        }
+      >
+        <div className="flex flex-col gap-4">
+          <p className="text-sm text-sand-600 dark:text-sand-300">
+            Use this once {member?.first_name} {member?.last_name} has been fully paid out. Their
+            Shares, Welfare, Compulsory Savings and Deposit balances (currently totalling{" "}
+            <strong className="font-semibold">{formatNaira(member?.total_asset ?? 0)}</strong>) will
+            be cleared to zero, and the member will remain on record tagged as Terminated. This is
+            recorded in the audit trail.
+          </p>
+          <Textarea
+            label="Reason"
+            required
+            placeholder="e.g. Membership terminated — final payout completed"
+            value={terminateReason}
+            onChange={(e) => setTerminateReason(e.target.value)}
           />
         </div>
       </Modal>

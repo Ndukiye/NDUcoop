@@ -1,12 +1,16 @@
 import { delay } from "../../mocks/delay";
+import { currentActorOffice } from "../../lib/actor";
 import {
   contributionBatches,
   postContributionBatch,
   correctContribution,
   correctionsForBatch,
+  prepareMonthlyPosting,
+  currentPostingMonth,
   type MockContributionBatch,
+  type MockPostingRow,
 } from "../../mocks/contributions";
-import { members, findMember } from "../../mocks/members";
+import { findMember } from "../../mocks/members";
 import { getMemberLedger } from "../../mocks/ledger";
 import { lookupMemberByMembershipId } from "../shared/memberLookup";
 
@@ -53,14 +57,21 @@ export async function submitContributionCorrection(input: {
     input.memberId,
     input.amount,
     input.reason,
-    "Current admin",
+    currentActorOffice(),
   );
   return delay(batch ?? null, 300);
 }
 
-export async function postContributions(): Promise<MockContributionBatch> {
-  const activeCount = members.filter((m) => m.status === "ACTIVE").length;
-  return delay(postContributionBatch(activeCount), 250);
+export { currentPostingMonth };
+
+export async function fetchPostingPreparation(): Promise<MockPostingRow[]> {
+  return delay(prepareMonthlyPosting(), 300);
+}
+
+export async function postContributions(
+  rows: { memberId: number; amount: string }[],
+): Promise<MockContributionBatch> {
+  return delay(postContributionBatch(rows), 250);
 }
 
 export interface ContributionMonthRow {

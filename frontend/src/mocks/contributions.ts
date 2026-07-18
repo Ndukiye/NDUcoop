@@ -1,4 +1,6 @@
 import { logAuditEntry } from "./audit";
+import { members } from "./members";
+import { currentActorOffice } from "../lib/actor";
 
 export interface MockContributionBatch {
   id: number;
@@ -29,22 +31,62 @@ export const contributionBatches: MockContributionBatch[] = Array.from({ length:
       id: nextId++,
       month: monthLabel(d),
       posted_at: new Date(d.getFullYear(), d.getMonth(), 26).toISOString(),
-      posted_by: "Amaka Okafor",
+      posted_by: "President",
       member_count: memberCount,
       total_amount: (memberCount * 10200).toFixed(2),
     };
   },
 );
 
-export function postContributionBatch(memberCount: number): MockContributionBatch {
+/**
+ * One editable line per active member in the pre-posting review. The fixed
+ * split (Shares 7,000 / Welfare 200 / Compulsory 3,000) always comes out of
+ * `amount`; anything above the 10,200 minimum lands in Deposits. Admins can
+ * adjust the amount per member (e.g. someone paid extra) or exclude members
+ * who didn't pay this month before the batch is posted.
+ */
+export interface MockPostingRow {
+  member_id: number;
+  membership_id: string;
+  name: string;
+  amount: string;
+  included: boolean;
+}
+
+// Proposal §6/§25: posting copies each member's previous-month contribution
+// forward so the admin only edits increases/decreases. Seeded at the minimum;
+// updated every time a batch is posted.
+const lastPostedAmounts = new Map<number, string>();
+
+export function prepareMonthlyPosting(): MockPostingRow[] {
+  return members
+    .filter((m) => m.status === "ACTIVE")
+    .map((m) => ({
+      member_id: m.id,
+      membership_id: m.membership_id,
+      name: `${m.first_name} ${m.last_name}`,
+      amount: lastPostedAmounts.get(m.id) ?? "10200.00",
+      included: true,
+    }));
+}
+
+export function currentPostingMonth(): string {
+  return monthLabel(new Date());
+}
+
+export function postContributionBatch(
+  rows: { memberId: number; amount: string }[],
+): MockContributionBatch {
   const now = new Date();
+  const total = rows.reduce((sum, r) => sum + Number(r.amount), 0);
+  for (const r of rows) lastPostedAmounts.set(r.memberId, r.amount);
   const batch: MockContributionBatch = {
     id: nextId++,
     month: monthLabel(now),
     posted_at: now.toISOString(),
-    posted_by: "Current admin",
-    member_count: memberCount,
-    total_amount: (memberCount * 10200).toFixed(2),
+    posted_by: currentActorOffice(),
+    member_count: rows.length,
+    total_amount: total.toFixed(2),
   };
   contributionBatches.unshift(batch);
   logAuditEntry({

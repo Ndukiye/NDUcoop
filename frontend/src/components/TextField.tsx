@@ -4,15 +4,22 @@ import clsx from "clsx";
 interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
   error?: string;
+  hideLabel?: boolean;
 }
 
 export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
-  ({ label, error, className, id, ...props }, ref) => {
+  ({ label, error, className, id, hideLabel, ...props }, ref) => {
     const generatedId = useId();
     const inputId = id ?? generatedId;
     return (
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor={inputId} className="text-sm font-medium text-sand-700 dark:text-sand-300">
+      <div className={clsx("flex flex-col", !hideLabel && "gap-1.5")}>
+        <label
+          htmlFor={inputId}
+          className={clsx(
+            "text-sm font-medium text-sand-700 dark:text-sand-300",
+            hideLabel && "sr-only",
+          )}
+        >
           {label}
         </label>
         <input

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { currentActorOffice } from "../../lib/actor";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card } from "../../components/Card";
 import { Button } from "../../components/Button";
@@ -79,7 +80,7 @@ export function ReportsAdminPage() {
         format,
         periodLabel: period,
         scope: isMemberStatement ? "MEMBER" : "COOPERATIVE",
-        generatedBy: "Current admin",
+        generatedBy: currentActorOffice(),
         memberId: memberLookup.member?.id,
       },
       {

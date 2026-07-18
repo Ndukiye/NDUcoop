@@ -16,8 +16,11 @@ export function RequireAuth() {
   });
 
   useEffect(() => {
-    if (isFetched) setUser(data ?? null);
-  }, [isFetched, data, setUser]);
+    // Only resolve the session while it is still undetermined. Without this
+    // guard, remounting after a successful login replays the pre-login
+    // cached "no user" result and bounces the user straight back to /login.
+    if (isFetched && status === "unknown") setUser(data ?? null);
+  }, [isFetched, data, setUser, status]);
 
   if (status === "unknown") {
     return (

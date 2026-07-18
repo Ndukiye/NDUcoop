@@ -42,7 +42,12 @@ export function DepositsMemberPage() {
       className: "text-right",
       sortAccessor: (r) => Number(r.amount),
     },
-    { key: "status", header: "Status", render: (r) => <StatusBadge status={r.status} /> },
+    {
+      key: "status",
+      header: "Status",
+      render: (r) => <StatusBadge status={r.status} />,
+      sortAccessor: (r) => r.status,
+    },
     { key: "note", header: "Decision note", render: (r) => r.decision_note ?? "—", className: "hidden md:table-cell" },
     {
       key: "receipt",
@@ -64,14 +69,6 @@ export function DepositsMemberPage() {
         </Button>
       </div>
 
-      <TextField
-        label="Search"
-        placeholder="Status or amount"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="sm:w-64"
-      />
-
       <DataTable
         columns={columns}
         rows={rows}
@@ -79,6 +76,16 @@ export function DepositsMemberPage() {
         isLoading={isLoading}
         defaultSort={{ key: "date", dir: "desc" }}
         pageSize={10}
+        toolbar={
+          <TextField
+            label="Search"
+            hideLabel
+            placeholder="Search status or amount"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full sm:w-72"
+          />
+        }
         emptyState={{
           title: "No deposits yet",
           description: "Deposits you make will show up here.",

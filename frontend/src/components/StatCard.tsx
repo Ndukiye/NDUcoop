@@ -36,7 +36,7 @@ export function StatCard({
           </span>
         )}
       </div>
-      <span className="min-w-0 font-display text-xl font-medium tracking-tight text-sand-900 dark:text-sand-50 sm:text-3xl sm:tracking-normal">
+      <span className="min-w-0 text-xl font-semibold tabular-nums tracking-tight text-sand-900 dark:text-sand-50 sm:text-[1.75rem] sm:leading-9">
         {value}
       </span>
       {hint && <span className="text-xs text-sand-400">{hint}</span>}
