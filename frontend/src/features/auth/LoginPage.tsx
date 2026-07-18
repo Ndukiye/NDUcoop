@@ -74,7 +74,7 @@ export function LoginPage() {
         </div>
 
         <p className="relative text-xs text-pine-300">
-          &copy; {new Date().getFullYear()} NDU Cooperative Society
+          &copy; {new Date().getFullYear()} NDU Staff Consumer Cooperative Society Ltd
         </p>
       </div>
 
@@ -161,16 +161,10 @@ export function LoginPage() {
             </p>
           </div>
 
-          <div className="mx-auto mt-9 w-full max-w-sm lg:hidden">
-            <p className="font-display text-xl font-medium italic leading-snug text-pine-100">
-              &ldquo;Every contribution, every loan, every naira &mdash; accounted for.&rdquo;
-            </p>
-            <p className="mt-2.5 text-sm leading-relaxed text-pine-300/90">
-              Member savings, loans, and commodities, managed with a full audit
-              trail your cooperative can trust.
-            </p>
-            <p className="mt-7 text-xs text-pine-400/80">
-              &copy; {new Date().getFullYear()} NDU Cooperative Society
+          <div className="mx-auto mt-9 w-full max-w-sm text-center lg:hidden">
+            <p className="text-sm text-pine-300/90">Savings &middot; Loans &middot; Commodities</p>
+            <p className="mt-2 text-xs text-pine-400/80">
+              &copy; {new Date().getFullYear()} NDU Staff Consumer Cooperative Society Ltd
             </p>
           </div>
         </div>
