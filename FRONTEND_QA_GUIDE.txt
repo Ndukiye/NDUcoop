@@ -18,10 +18,10 @@ you find, and note anything that looks wrong, missing, or confusing.
 
 HOW TO RUN IT
 -------------
-From the project root (two terminals):
+The prototype is fully self-contained (login included) — no backend needed.
+Either open the hosted link you were given, or run it locally:
 
-    Terminal 1:  cd backend  &&  venv/bin/python manage.py runserver
-    Terminal 2:  cd frontend &&  npm run dev
+    cd frontend  &&  npm install  &&  npm run dev
 
 Then open http://localhost:5173/login in your browser.
 
@@ -31,7 +31,8 @@ approval, onboarding a member, etc.) only lives in your browser's memory for
 the current tab session. This means:
   - Click around using the sidebar links, not the browser's refresh button.
   - If you refresh the page or close the tab, all your test actions (and the
-    mock data changes they made) reset back to the seeded starting state.
+    mock data changes they made) reset back to the seeded starting state
+    (you stay signed in, though).
   - This is expected — it is NOT a bug. It goes away once the real backend
     (Phase 1+) is built and the app is talking to a real database.
 
